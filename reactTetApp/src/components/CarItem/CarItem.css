@@ -1,0 +1,19 @@
+.car-item {
+	display: flex;
+	margin-bottom: 20px;
+}
+
+.car-item__image img {
+	width: 150px;
+	height: 100px;
+	object-fit: cover;
+}
+
+.car-item__details {
+	margin-left: 20px;
+	flex: 1;
+}
+
+.car-item__actions {
+	margin-top: 10px;
+}
