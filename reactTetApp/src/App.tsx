@@ -5,19 +5,23 @@ import LoginPage from './pages/Login/LoginPage'
 import RegisterPage from './pages/Register/RegisterPage'
 import CarDetail from './pages/CarDetail/CarDetail'
 import Header from './components/Layout/Header/Header'
+import Footer from './components/Layout/Footer/Footer'
 import './App.css'
 
 const App: React.FC = () => {
 	return (
 		<Router>
 			<Header />
-			<div className='App' style={{ paddingTop: '50px' }}>
-				<Routes>
-					<Route path='/' element={<Home />} />
-					<Route path='/login' element={<LoginPage />} />
-					<Route path='/register' element={<RegisterPage />} />
-					<Route path='/cars/:id' element={<CarDetail />} />
-				</Routes>
+			<div className='App'>
+				<div className='main-content'>
+					<Routes>
+						<Route path='/' element={<Home />} />
+						<Route path='/login' element={<LoginPage />} />
+						<Route path='/register' element={<RegisterPage />} />
+						<Route path='/cars/:id' element={<CarDetail />} />
+					</Routes>
+				</div>
+				<Footer />
 			</div>
 		</Router>
 	)

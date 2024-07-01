@@ -1,8 +1,18 @@
 import bcrypt from 'bcryptjs'
-import jwt from 'jsonwebtoken'
-import * as userRepository from '../repositories/userRepository'
+import * as userRepository from '../repositories/authRepository'
+import {
+	generateAccessToken,
+	generateRefreshToken,
+	UserPayload,
+} from './tokenService'
 
-const JWT_SECRET = 'your_jwt_secret' // Замените на свой секретный ключ
+interface RegisterParams {
+	email: string
+	password: string
+	name: string
+	surname: string
+	phone: string
+}
 
 export const register = async ({
 	email,
@@ -10,7 +20,7 @@ export const register = async ({
 	name,
 	surname,
 	phone,
-}: any) => {
+}: RegisterParams) => {
 	const hashedPassword = await bcrypt.hash(password, 10)
 	await userRepository.createUser({
 		email,
@@ -19,6 +29,15 @@ export const register = async ({
 		surname,
 		phone,
 	})
+
+	const user = await userRepository.findUserByEmail(email)
+	if (!user) throw new Error('User registration failed')
+
+	const userPayload: UserPayload = { id: user.id, email: user.email }
+	const accessToken = generateAccessToken(userPayload)
+	const refreshToken = generateRefreshToken(userPayload)
+
+	return { accessToken, refreshToken, user }
 }
 
 export const login = async (email: string, password: string) => {
@@ -28,6 +47,12 @@ export const login = async (email: string, password: string) => {
 	const isPasswordValid = await bcrypt.compare(password, user.password)
 	if (!isPasswordValid) throw new Error('Invalid email or password')
 
-	const token = jwt.sign({ id: user.id }, JWT_SECRET, { expiresIn: '1h' })
-	return token
+	const userPayload: UserPayload = { id: user.id, email: user.email }
+	const accessToken = generateAccessToken(userPayload)
+	const refreshToken = generateRefreshToken(userPayload)
+
+	return { accessToken, refreshToken, user }
+}
+export const getUserById = async (id: number) => {
+	return await userRepository.findUserById(id)
 }

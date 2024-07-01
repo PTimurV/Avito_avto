@@ -3,10 +3,36 @@ import knexConfig from '../knexfile'
 
 const db = knex(knexConfig.development)
 
-export const createCar = async (carData: any) => {
-	await db('cars').insert(carData)
+interface CarData {
+	user_id: number
+	car_type_id: number
+	color_id: number
+	VIN: string
+	state_number: string
+	manufacturer_id: number
+	brand_id: number
+	model_id: number
+	release_year: number
+	engine_type_id: number
+	drive_id: number
+	transmission_id: number
+	mileage: number
+	condition_id: number
+	owners_by_PTS: number
+	description: string
+	adress: string
+	price: number
 }
 
+export const createCar = async (carData: CarData) => {
+	const [car] = await db('cars').insert(carData).returning('*')
+	return car
+}
+
+export const addCarPhotos = async (carId: number, photos: string[]) => {
+	const photoData = photos.map(photo => ({ cars_id: carId, img: photo }))
+	await db('cars_photo').insert(photoData)
+}
 export const getAllCars = async (filters: any) => {
 	try {
 		const query = db('cars as c')
@@ -98,6 +124,16 @@ export const getAllCars = async (filters: any) => {
 			query.where('c.condition_id', '=', Number(filters.condition))
 		}
 
+		if (filters.search) {
+			query.where(builder => {
+				builder
+					.where('brand.name', 'ilike', `%${filters.search}%`)
+					.orWhere('model.name', 'ilike', `%${filters.search}%`)
+					.orWhere('description', 'ilike', `%${filters.search}%`)
+					.orWhere('adress', 'ilike', `%${filters.search}%`)
+			})
+		}
+
 		return await query
 	} catch (error) {
 		console.error('Ошибка при получении автомобилей:', error)
@@ -142,4 +178,38 @@ export const getCarById = async (id: number) => {
 		.leftJoin('users', 'cars.user_id', 'users.id')
 		.where('cars.id', id)
 		.first()
+}
+
+export const findCarsByUserId = async (userId: number) => {
+	return db('cars')
+		.join('manufacturer', 'cars.manufacturer_id', 'manufacturer.id')
+		.join('car_type', 'cars.car_type_id', 'car_type.id')
+		.join('color', 'cars.color_id', 'color.id')
+		.join('brand', 'cars.brand_id', 'brand.id')
+		.join('model', 'cars.model_id', 'model.id')
+		.join('engine_type', 'cars.engine_type_id', 'engine_type.id')
+		.join('drive', 'cars.drive_id', 'drive.id')
+		.join('transmission', 'cars.transmission_id', 'transmission.id')
+		.join('condition', 'cars.condition_id', 'condition.id')
+		.where('cars.user_id', userId)
+		.select(
+			'cars.id',
+			'cars.VIN',
+			'cars.state_number',
+			'cars.release_year',
+			'cars.mileage',
+			'cars.owners_by_PTS',
+			'cars.description',
+			'cars.adress',
+			'cars.price',
+			'manufacturer.name as manufacturer',
+			'car_type.type as car_type',
+			'color.name as color',
+			'brand.name as brand',
+			'model.name as model',
+			'engine_type.name as engine_type',
+			'drive.name as drive',
+			'transmission.name as transmission',
+			'condition.name as condition'
+		)
 }

@@ -7,3 +7,11 @@ export interface Car {
 	description: string
 	price: number
 }
+
+export interface User {
+	id: number
+	email: string
+	name: string
+	surname: string
+	phone: string
+}

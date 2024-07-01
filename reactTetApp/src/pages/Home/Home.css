@@ -1,18 +1,17 @@
 .home {
 	display: flex;
+	flex-direction: row;
+	padding-top: 20px; /* Обновленный отступ сверху */
 }
 
 .filters {
 	width: 250px;
 	margin-right: 20px;
-}
-
-.filter-item {
-	margin-bottom: 20px;
+	flex-shrink: 0;
 }
 
 .car-list {
-	flex: 1;
+	flex-grow: 1;
 	display: flex;
 	flex-direction: column;
 }

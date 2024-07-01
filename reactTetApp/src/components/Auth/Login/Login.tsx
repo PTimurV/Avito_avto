@@ -1,10 +1,30 @@
 import React from 'react'
 import { Form, Input, Button } from 'antd'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { useAppDispatch } from '../../../hooks'
+import { setUser } from '../../../store/userSlice'
 import './Login.css'
 
 const Login: React.FC = () => {
-	const onFinish = (values: any) => {
-		console.log('Success:', values)
+	const navigate = useNavigate()
+	const dispatch = useAppDispatch()
+
+	const onFinish = async (values: any) => {
+		try {
+			const response = await axios.post(
+				'http://localhost:3000/api/auth/login',
+				values,
+				{ withCredentials: true }
+			)
+			const userData = response.data.user
+			const accessToken = response.data.accessToken
+			localStorage.setItem('accessToken', accessToken)
+			dispatch(setUser(userData))
+			navigate('/')
+		} catch (error) {
+			console.error('Ошибка при входе:', error)
+		}
 	}
 
 	const onFinishFailed = (errorInfo: any) => {

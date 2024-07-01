@@ -4,6 +4,7 @@
 
 .car-detail__images {
 	display: flex;
+	height: 100px;
 	gap: 10px;
 	margin-bottom: 20px;
 }

@@ -1,12 +1,62 @@
 import { Request, Response } from 'express'
 import * as carService from '../services/carService'
+import { verifyAccessToken } from '../services/tokenService'
 
 export const createCar = async (req: Request, res: Response) => {
 	try {
-		const carData = req.body
-		console.log('Repository: inserting car data:', carData)
-		await carService.createCar(carData)
-		res.status(201).send('Car created successfully')
+		const authHeader = req.headers.authorization
+		if (!authHeader) {
+			return res.status(401).send('Unauthorized')
+		}
+
+		const token = authHeader.split(' ')[1]
+		const userPayload = verifyAccessToken(token)
+
+		const {
+			car_type_id,
+			color_id,
+			VIN,
+			state_number,
+			manufacturer_id,
+			brand_id,
+			model_id,
+			release_year,
+			engine_type_id,
+			drive_id,
+			transmission_id,
+			mileage,
+			condition_id,
+			owners_by_PTS,
+			description,
+			adress,
+			price,
+			photos,
+		} = req.body
+
+		const carData = {
+			user_id: userPayload.id,
+			car_type_id,
+			color_id,
+			VIN,
+			state_number,
+			manufacturer_id,
+			brand_id,
+			model_id,
+			release_year,
+			engine_type_id,
+			drive_id,
+			transmission_id,
+			mileage,
+			condition_id,
+			owners_by_PTS,
+			description,
+			adress,
+			price,
+		}
+
+		const car = await carService.createCar(carData, photos)
+
+		res.status(201).json(car)
 	} catch (error) {
 		console.error('Error creating car:', error)
 		res.status(500).send('Error creating car')
