@@ -4,8 +4,10 @@ import {
 	UserOutlined,
 	SettingOutlined,
 	LogoutOutlined,
+	ProfileOutlined,
 } from '@ant-design/icons'
 import { User } from '../../types'
+import { useNavigate } from 'react-router-dom'
 import './Profile.css'
 
 interface ProfileProps {
@@ -14,7 +16,24 @@ interface ProfileProps {
 }
 
 const Profile: React.FC<ProfileProps> = ({ user, onLogout }) => {
+	const navigate = useNavigate()
+
+	const handleMenuClick = (e: any) => {
+		if (e.key === 'settings') {
+			navigate('/settings')
+		} else if (e.key === 'logout') {
+			onLogout()
+		} else if (e.key === 'profile') {
+			navigate(`/profile/${user.id}`)
+		}
+	}
+
 	const menuItems = [
+		{
+			key: 'profile',
+			icon: <ProfileOutlined />,
+			label: 'Профиль',
+		},
 		{
 			key: 'settings',
 			icon: <SettingOutlined />,
@@ -28,7 +47,7 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout }) => {
 		},
 	]
 
-	const menu = <Menu items={menuItems} />
+	const menu = <Menu items={menuItems} onClick={handleMenuClick} />
 
 	return (
 		<Dropdown overlay={menu} trigger={['click']}>

@@ -30,11 +30,31 @@ export const createCar = async (carData: CarData, photos: string[]) => {
 }
 
 export const getAllCars = async (filters: any) => {
-	return await carRepository.getAllCars(filters)
+	const cars = await carRepository.getAllCars(filters)
+	return cars
 }
 
 export const getCarById = async (id: number) => {
-	return await carRepository.getCarById(id)
+	const car = await carRepository.getCarById(id)
+	return car
+}
+
+export const getCarByIdWithIds = async (id: number) => {
+	// новый сервис
+	const car = await carRepository.getCarByIdWithIds(id)
+	return car
+}
+
+export const updateCar = async (
+	id: number,
+	carData: CarData,
+	photos: string[]
+) => {
+	// новый сервис
+	await carRepository.updateCar(id, carData)
+	if (photos && photos.length > 0) {
+		await carRepository.updateCarPhotos(id, photos)
+	}
 }
 
 export const getCarsByUserId = async (userId: number) => {

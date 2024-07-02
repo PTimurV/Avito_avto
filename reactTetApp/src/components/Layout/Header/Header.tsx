@@ -50,7 +50,12 @@ const Header: React.FC = () => {
 			</div>
 			<div className='nav-buttons'>
 				{user ? (
-					<Profile user={user} onLogout={handleLogout} />
+					<>
+						<Link to='/create-ad'>
+							<Button type='primary'>Разместить объявление</Button>
+						</Link>
+						<Profile user={user} onLogout={handleLogout} />
+					</>
 				) : (
 					<>
 						<Link to='/login'>

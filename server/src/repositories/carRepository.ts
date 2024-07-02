@@ -33,6 +33,7 @@ export const addCarPhotos = async (carId: number, photos: string[]) => {
 	const photoData = photos.map(photo => ({ cars_id: carId, img: photo }))
 	await db('cars_photo').insert(photoData)
 }
+
 export const getAllCars = async (filters: any) => {
 	try {
 		const query = db('cars as c')
@@ -134,7 +135,17 @@ export const getAllCars = async (filters: any) => {
 			})
 		}
 
-		return await query
+		const cars = await query
+
+		// Get photos for each car
+		for (const car of cars) {
+			const photos = await db('cars_photo')
+				.select('img')
+				.where('cars_id', car.id)
+			car.photos = photos.map(photo => photo.img)
+		}
+
+		return cars
 	} catch (error) {
 		console.error('Ошибка при получении автомобилей:', error)
 		throw error
@@ -142,7 +153,7 @@ export const getAllCars = async (filters: any) => {
 }
 
 export const getCarById = async (id: number) => {
-	return await db('cars')
+	const car = await db('cars')
 		.select(
 			'cars.id',
 			'VIN',
@@ -178,10 +189,67 @@ export const getCarById = async (id: number) => {
 		.leftJoin('users', 'cars.user_id', 'users.id')
 		.where('cars.id', id)
 		.first()
+
+	if (car) {
+		const photos = await db('cars_photo').select('img').where('cars_id', car.id)
+		car.photos = photos.map(photo => photo.img)
+	}
+
+	return car
+}
+
+export const getCarByIdWithIds = async (id: number) => {
+	// новый метод
+	const car = await db('cars')
+		.select(
+			'cars.id',
+			'VIN',
+			'state_number',
+			'release_year',
+			'mileage',
+			'owners_by_PTS',
+			'description',
+			'adress',
+			'price',
+			'cars.manufacturer_id',
+			'cars.car_type_id',
+			'cars.color_id',
+			'cars.brand_id',
+			'cars.model_id',
+			'cars.engine_type_id',
+			'cars.drive_id',
+			'cars.transmission_id',
+			'cars.condition_id',
+			'users.name as user_name',
+			'users.surname as user_surname',
+			'users.phone as user_phone'
+		)
+		.leftJoin('users', 'cars.user_id', 'users.id')
+		.where('cars.id', id)
+		.first()
+
+	if (car) {
+		const photos = await db('cars_photo').select('img').where('cars_id', car.id)
+		car.photos = photos.map(photo => photo.img)
+	}
+
+	return car
+}
+
+export const updateCar = async (id: number, carData: CarData) => {
+	// новый метод
+	await db('cars').where('id', id).update(carData)
+}
+
+export const updateCarPhotos = async (carId: number, photos: string[]) => {
+	// новый метод
+	await db('cars_photo').where('cars_id', carId).del()
+	const photoData = photos.map(photo => ({ cars_id: carId, img: photo }))
+	await db('cars_photo').insert(photoData)
 }
 
 export const findCarsByUserId = async (userId: number) => {
-	return db('cars')
+	const cars = await db('cars')
 		.join('manufacturer', 'cars.manufacturer_id', 'manufacturer.id')
 		.join('car_type', 'cars.car_type_id', 'car_type.id')
 		.join('color', 'cars.color_id', 'color.id')
@@ -212,4 +280,11 @@ export const findCarsByUserId = async (userId: number) => {
 			'transmission.name as transmission',
 			'condition.name as condition'
 		)
+
+	for (const car of cars) {
+		const photos = await db('cars_photo').select('img').where('cars_id', car.id)
+		car.photos = photos.map(photo => photo.img)
+	}
+
+	return cars
 }

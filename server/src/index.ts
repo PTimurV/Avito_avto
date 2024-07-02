@@ -6,6 +6,7 @@ import carRoutes from './routes/carRoutes'
 import userRoutes from './routes/userRoutes'
 import brandRoutes from './routes/brandRoutes'
 import modelRoutes from './routes/modelRoutes'
+const bodyParser = require('body-parser')
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -15,6 +16,8 @@ const corsOptions = {
 	credentials: true, // разрешить отправку cookies
 }
 
+app.use(bodyParser.json({ limit: '50mb' }))
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }))
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(cookieParser())

@@ -71,9 +71,36 @@ const Filters: React.FC<FiltersProps> = ({ onFiltersChange }) => {
 		handleFilterChange('brandId', brandId)
 		handleFilterChange('model', null) // Reset model when brand changes
 	}
+	const resetFilters = () => {
+		const initialFilters = {
+			carType: '',
+			manufacturer: [],
+			brand: null,
+			brandId: null,
+			model: null,
+			priceFrom: '',
+			priceTo: '',
+			yearFrom: '',
+			yearTo: '',
+			mileageFrom: '',
+			mileageTo: '',
+			transmission: [],
+			drive: [],
+			engineType: [],
+			ownersFrom: '',
+			ownersTo: '',
+			registration: '',
+			condition: '',
+			color: '',
+			search: '',
+		}
+		setFilters(initialFilters)
+		onFiltersChange(initialFilters)
+	}
 
 	return (
 		<div className='filters'>
+			<button onClick={resetFilters}>Сбросить</button>
 			<div className='filter-item'>
 				<label>Поиск</label>
 				<input

@@ -7,6 +7,9 @@ import CarDetail from './pages/CarDetail/CarDetail'
 import Header from './components/Layout/Header/Header'
 import Footer from './components/Layout/Footer/Footer'
 import './App.css'
+import CreateAd from './pages/CreateAd/CreateAd'
+import Settings from './pages/Settings/Settings'
+import ProfileInfo from './pages/ProfileInfo/ProfileInfo'
 
 const App: React.FC = () => {
 	return (
@@ -19,6 +22,9 @@ const App: React.FC = () => {
 						<Route path='/login' element={<LoginPage />} />
 						<Route path='/register' element={<RegisterPage />} />
 						<Route path='/cars/:id' element={<CarDetail />} />
+						<Route path='/create-ad' element={<CreateAd />} />
+						<Route path='/settings' element={<Settings />} />
+						<Route path='/profile/:id' element={<ProfileInfo />} />
 					</Routes>
 				</div>
 				<Footer />

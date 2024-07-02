@@ -25,6 +25,7 @@ interface CarDetail {
 	user_name: string
 	user_surname: string
 	user_phone: string | null
+	photos: string[]
 }
 
 const CarDetail: React.FC = () => {
@@ -45,9 +46,13 @@ const CarDetail: React.FC = () => {
 	return (
 		<div className='car-detail'>
 			<div className='car-detail__images'>
-				{/* Здесь будут заглушки для изображений */}
-				<img src='/images/placeholder.jpg' alt='Car' />
-				<img src='/images/placeholder.jpg' alt='Car' />
+				{car.photos && car.photos.length > 0 ? (
+					car.photos.map((photo, index) => (
+						<img key={index} src={photo} alt={`Car photo ${index + 1}`} />
+					))
+				) : (
+					<img src='/images/placeholder.jpg' alt='Car' />
+				)}
 			</div>
 			<div className='car-detail__info'>
 				<h1>{`${car.brand} ${car.model} ${car.release_year}, ${car.mileage} км`}</h1>

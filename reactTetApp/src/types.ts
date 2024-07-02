@@ -6,10 +6,11 @@ export interface Car {
 	mileage: number
 	description: string
 	price: number
+	photos?: [string]
 }
 
 export interface User {
-	id: number
+	id?: number
 	email: string
 	name: string
 	surname: string

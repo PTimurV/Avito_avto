@@ -1,0 +1,27 @@
+.create-ad {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.create-ad h1 {
+	text-align: center;
+	margin-bottom: 24px;
+}
+
+.create-ad .ant-form-item {
+	margin-bottom: 16px;
+}
+
+.create-ad .ant-btn {
+	display: block;
+	margin: 0 auto;
+}
+
+.create-ad .ant-input,
+.create-ad .ant-select {
+	width: 100%;
+}
