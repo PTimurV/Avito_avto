@@ -261,7 +261,7 @@ const CreateAd: React.FC = () => {
 				>
 					<Select onChange={value => handleChange('condition_id', value)}>
 						<Option value='1'>Битые</Option>
-						<Option value='2'>Кроме битых</Option>
+						<Option value='2'>Кроме целых</Option>
 					</Select>
 				</Form.Item>
 				<Form.Item

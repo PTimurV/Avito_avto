@@ -29,14 +29,28 @@ export const createCar = async (carData: CarData, photos: string[]) => {
 	return car
 }
 
-export const getAllCars = async (filters: any) => {
-	const cars = await carRepository.getAllCars(filters)
+export const getAllCars = async (filters: any, page: number, limit: number) => {
+	const offset = (page - 1) * limit
+	const cars = await carRepository.getAllCars(filters, limit, offset)
 	return cars
 }
 
-export const getCarById = async (id: number) => {
-	const car = await carRepository.getCarById(id)
-	return car
+export const countAllCars = async (filters: any) => {
+	const total = await carRepository.countAllCars(filters)
+	return total
+}
+
+export const getCarById = async (id: number, userId: number | null) => {
+	try {
+		const car = await carRepository.getCarById(id)
+		if (car) {
+			car.owner = userId && car.user_id === userId ? 1 : 0
+		}
+		return car
+	} catch (error) {
+		console.error('Error fetching car from repository:', error)
+		throw error
+	}
 }
 
 export const getCarByIdWithIds = async (id: number) => {
@@ -55,6 +69,10 @@ export const updateCar = async (
 	if (photos && photos.length > 0) {
 		await carRepository.updateCarPhotos(id, photos)
 	}
+}
+
+export const deleteCar = async (carId: number, userId: number) => {
+	return await carRepository.deleteCar(carId, userId)
 }
 
 export const getCarsByUserId = async (userId: number) => {

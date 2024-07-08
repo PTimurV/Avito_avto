@@ -10,6 +10,12 @@ import './App.css'
 import CreateAd from './pages/CreateAd/CreateAd'
 import Settings from './pages/Settings/Settings'
 import ProfileInfo from './pages/ProfileInfo/ProfileInfo'
+import EditCar from './pages/EditCar/EditCar'
+import ChatPage from './pages/ChatPage/ChatPage'
+import ChatRoom from './components/ChatRoom/ChatRoom'
+import FavoritesPage from './pages/FavoritesPage/FavoritesPage'
+import ViewHistory from './pages/ViewHistory/ViewHistory'
+import Recommendations from './pages/Recommendations/Recommendations'
 
 const App: React.FC = () => {
 	return (
@@ -25,6 +31,12 @@ const App: React.FC = () => {
 						<Route path='/create-ad' element={<CreateAd />} />
 						<Route path='/settings' element={<Settings />} />
 						<Route path='/profile/:id' element={<ProfileInfo />} />
+						<Route path='/edit-car/:id' element={<EditCar />} />
+						<Route path='/chats' element={<ChatPage />} />
+						<Route path='/chat/:id' element={<ChatRoom />} />
+						<Route path='/favorites' element={<FavoritesPage />} />
+						<Route path='/view-history' element={<ViewHistory />} />
+						<Route path='/recommendations' element={<Recommendations />} />
 					</Routes>
 				</div>
 				<Footer />

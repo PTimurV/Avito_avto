@@ -5,6 +5,9 @@ import {
 	SettingOutlined,
 	LogoutOutlined,
 	ProfileOutlined,
+	StarOutlined,
+	HistoryOutlined,
+	LikeOutlined,
 } from '@ant-design/icons'
 import { User } from '../../types'
 import { useNavigate } from 'react-router-dom'
@@ -25,6 +28,12 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout }) => {
 			onLogout()
 		} else if (e.key === 'profile') {
 			navigate(`/profile/${user.id}`)
+		} else if (e.key === 'favorites') {
+			navigate('/favorites')
+		} else if (e.key === 'view-history') {
+			navigate('/view-history')
+		} else if (e.key === 'recommendations') {
+			navigate('/recommendations')
 		}
 	}
 
@@ -38,6 +47,21 @@ const Profile: React.FC<ProfileProps> = ({ user, onLogout }) => {
 			key: 'settings',
 			icon: <SettingOutlined />,
 			label: 'Настройки',
+		},
+		{
+			key: 'favorites',
+			icon: <StarOutlined />,
+			label: 'Избранное',
+		},
+		{
+			key: 'view-history',
+			icon: <HistoryOutlined />,
+			label: 'История посещений',
+		},
+		{
+			key: 'recommendations',
+			icon: <LikeOutlined />,
+			label: 'Рекомендации',
 		},
 		{
 			key: 'logout',

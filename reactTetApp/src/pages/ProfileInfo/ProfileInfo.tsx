@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { Car, User } from '../../types'
 import { Button, Card } from 'antd'
+import { Car, User } from '../../types'
+import MessageSender from '../../components/MessageSender/MessageSender'
 import './ProfileInfo.css'
 
 interface ProfileData {
@@ -13,6 +14,7 @@ interface ProfileData {
 
 const ProfileInfo: React.FC = () => {
 	const { id } = useParams<{ id: string }>()
+	const navigate = useNavigate()
 	const [profile, setProfile] = useState<ProfileData | null>(null)
 
 	useEffect(() => {
@@ -40,6 +42,32 @@ const ProfileInfo: React.FC = () => {
 		fetchProfile()
 	}, [id])
 
+	const handleDelete = async (carId: number) => {
+		try {
+			const accessToken = localStorage.getItem('accessToken')
+			if (!accessToken) {
+				throw new Error('Нет токена доступа')
+			}
+
+			await axios.delete(`http://localhost:3000/api/cars/${carId}`, {
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			})
+
+			// Обновляем состояние, чтобы удалить объявление из списка
+			setProfile(prevProfile => {
+				if (!prevProfile) return prevProfile
+				return {
+					...prevProfile,
+					cars: prevProfile.cars.filter(car => car.id !== carId),
+				}
+			})
+		} catch (error) {
+			console.error('Ошибка при удалении объявления:', error)
+		}
+	}
+
 	if (!profile) {
 		return <div>Загрузка...</div>
 	}
@@ -55,6 +83,7 @@ const ProfileInfo: React.FC = () => {
 					<strong>Телефон:</strong> {profile.user.phone || 'Не указан'}
 				</p>
 			</div>
+			{profile.owner === 0 && <MessageSender receiverId={id} />}
 			<div className='profile-info__cars'>
 				<h2>Мои объявления</h2>
 				{profile.cars.map(car => (
@@ -70,15 +99,23 @@ const ProfileInfo: React.FC = () => {
 							/>
 						</div>
 						<div className='car-item__details'>
-							<h3>{`${car.brand} ${car.model} ${car.release_year}, ${car.mileage} км`}</h3>
+							<h3
+								onClick={() => navigate(`/cars/${car.id}`)}
+								className='car-title'
+							>{`${car.brand} ${car.model} ${car.release_year}, ${car.mileage} км`}</h3>
 							<p>{car.description}</p>
 							<p>
 								<strong>{car.price} ₽</strong>
 							</p>
 							{profile.owner === 1 && (
 								<div className='car-item__actions'>
-									<Button type='primary'>Редактировать</Button>
-									<Button>Удалить</Button>
+									<Button
+										type='primary'
+										onClick={() => navigate(`/edit-car/${car.id}`)}
+									>
+										Редактировать
+									</Button>
+									<Button onClick={() => handleDelete(car.id)}>Удалить</Button>
 								</div>
 							)}
 						</div>

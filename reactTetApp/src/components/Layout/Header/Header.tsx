@@ -54,6 +54,9 @@ const Header: React.FC = () => {
 						<Link to='/create-ad'>
 							<Button type='primary'>Разместить объявление</Button>
 						</Link>
+						<Link to='/chats'>
+							<Button>Чаты</Button>
+						</Link>
 						<Profile user={user} onLogout={handleLogout} />
 					</>
 				) : (
