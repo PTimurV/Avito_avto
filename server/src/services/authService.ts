@@ -53,6 +53,7 @@ export const login = async (email: string, password: string) => {
 
 	return { accessToken, refreshToken, user }
 }
+
 export const getUserById = async (id: number) => {
 	return await userRepository.findUserById(id)
 }

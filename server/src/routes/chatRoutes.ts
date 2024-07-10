@@ -4,11 +4,12 @@ import {
 	sendMessage,
 	getUserChats,
 } from '../controllers/chatController'
+import authMiddleware from '../middleware/authMiddleware'
 
 const router = Router()
 
-router.get('/history/:conversationId', getChatHistory)
-router.post('/send-message', sendMessage)
-router.get('/user-chats', getUserChats) // Новый маршрут
+router.get('/history/:conversationId', authMiddleware, getChatHistory)
+router.post('/send-message', authMiddleware, sendMessage)
+router.get('/user-chats', authMiddleware, getUserChats) // Новый маршрут
 
 export default router

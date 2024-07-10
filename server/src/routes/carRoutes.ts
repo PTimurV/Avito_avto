@@ -7,14 +7,15 @@ import {
 	updateCar,
 	deleteCar,
 } from '../controllers/carController'
+import authMiddleware from '../middleware/authMiddleware'
 
 const router = Router()
 
-router.post('/cars', createCar)
-router.get('/cars', getAllCars)
-router.get('/cars/:id', getCarById)
-router.get('/cars/:id/edit', getCarByIdWithIds) // новый маршрут для получения информации с ID
-router.put('/cars/:id', updateCar) // новый маршрут для обновления информации
-router.delete('/cars/:id', deleteCar)
+router.post('/cars', authMiddleware, createCar) // Проверка авторизации для создания машины
+router.get('/cars', getAllCars) // Доступно всем
+router.get('/cars/:id', getCarById) // Доступно всем
+router.get('/cars/:id/edit', authMiddleware, getCarByIdWithIds) // Проверка авторизации для получения информации с ID
+router.put('/cars/:id', authMiddleware, updateCar) // Проверка авторизации для обновления информации
+router.delete('/cars/:id', authMiddleware, deleteCar) // Проверка авторизации для удаления машины
 
 export default router

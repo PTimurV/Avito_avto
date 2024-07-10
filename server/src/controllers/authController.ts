@@ -47,8 +47,7 @@ export const register = async (req: Request, res: Response) => {
 
 		refreshTokens.add(refreshToken)
 
-		res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false })
-		res.json({ accessToken, user })
+		res.json({ accessToken, refreshToken, user })
 	} catch (error) {
 		const errorMessage =
 			(error as ErrorWithMessage).message || 'An error occurred'
@@ -66,8 +65,7 @@ export const login = async (req: Request, res: Response) => {
 
 		refreshTokens.add(refreshToken)
 
-		res.cookie('refreshToken', refreshToken, { httpOnly: true, secure: false })
-		res.json({ accessToken, user })
+		res.json({ accessToken, refreshToken, user })
 	} catch (error) {
 		const errorMessage =
 			(error as ErrorWithMessage).message || 'An error occurred'
@@ -76,9 +74,14 @@ export const login = async (req: Request, res: Response) => {
 }
 
 export const refreshToken = (req: Request, res: Response) => {
-	const { refreshToken } = req.cookies
+	const authHeader = req.headers.authorization
+	if (!authHeader) {
+		return res.status(403).send('Refresh token is not provided')
+	}
 
-	if (!refreshToken || !refreshTokens.has(refreshToken)) {
+	const refreshToken = authHeader.split(' ')[1]
+
+	if (!refreshTokens.has(refreshToken)) {
 		return res.status(403).send('Refresh token is not valid')
 	}
 
@@ -92,8 +95,12 @@ export const refreshToken = (req: Request, res: Response) => {
 }
 
 export const logout = (req: Request, res: Response) => {
-	const { refreshToken } = req.cookies
+	const authHeader = req.headers.authorization
+	if (!authHeader) {
+		return res.status(403).send('Refresh token is not provided')
+	}
+
+	const refreshToken = authHeader.split(' ')[1]
 	refreshTokens.delete(refreshToken)
-	res.clearCookie('refreshToken')
 	res.send('Logout successful')
 }

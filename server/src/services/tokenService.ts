@@ -8,7 +8,7 @@ export interface UserPayload {
 }
 
 export const generateAccessToken = (payload: UserPayload) => {
-	return jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' })
+	return jwt.sign(payload, JWT_SECRET, { expiresIn: '30m' })
 }
 
 export const generateRefreshToken = (payload: UserPayload) => {

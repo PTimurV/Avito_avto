@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../store'
 import MessageSender from '../../components/MessageSender/MessageSender'
 import { HeartOutlined, HeartFilled } from '@ant-design/icons'
 import './CarDetail.css'
 import AIChat from '../../components/AIChat/AIChat'
+import CarImageSlider from '../../components/CarImageSlider/CarImageSlider'
+import { Button } from 'antd'
 
 interface CarDetail {
 	id: number
@@ -59,6 +63,7 @@ const CarDetail: React.FC = () => {
 	const [car, setCar] = useState<CarDetail | null>(null)
 	const [vinInfo, setVinInfo] = useState<VinInfo | null>(null)
 	const [isFavorite, setIsFavorite] = useState<boolean>(false)
+	const currentUser = useSelector((state: RootState) => state.user.user)
 
 	const fetchCar = async () => {
 		try {
@@ -153,6 +158,23 @@ const CarDetail: React.FC = () => {
 		}
 	}
 
+	const handleDelete = async (carId: number) => {
+		try {
+			const accessToken = localStorage.getItem('accessToken')
+			if (!accessToken) {
+				throw new Error('Нет токена доступа')
+			}
+
+			await axios.delete(`http://localhost:3000/api/cars/${carId}`, {
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			})
+		} catch (error) {
+			console.error('Ошибка при удалении объявления:', error)
+		}
+	}
+
 	const toggleFavorite = async () => {
 		try {
 			const accessToken = localStorage.getItem('accessToken')
@@ -196,24 +218,14 @@ const CarDetail: React.FC = () => {
 		return <div>Загрузка...</div>
 	}
 
+	const isOwner = currentUser?.id === car.user_id
+
 	return (
 		<div className='car-detail'>
-			<div className='car-detail__images'>
-				{car.photos.length > 0 ? (
-					car.photos.map((photo, index) => (
-						<img key={index} src={photo} alt={`Car ${index + 1}`} />
-					))
-				) : (
-					<>
-						<img src='/images/placeholder.jpg' alt='Car' />
-						<img src='/images/placeholder.jpg' alt='Car' />
-					</>
-				)}
-			</div>
+			<CarImageSlider photos={car.photos} />
 			<div className='car-detail__info'>
 				<h1>{`${car.brand} ${car.model} ${car.release_year}, ${car.mileage} км`}</h1>
 				<h2>{`${car.price} ₽`}</h2>
-				<p>{car.description}</p>
 			</div>
 			<div className='car-detail__characteristics'>
 				<h3>Характеристики</h3>
@@ -223,9 +235,6 @@ const CarDetail: React.FC = () => {
 					</li>
 					<li>
 						<strong>Тип двигателя:</strong> {car.engine_type}
-					</li>
-					<li>
-						<strong>Тип топлива:</strong> {car.engine_type}
 					</li>
 					<li>
 						<strong>Коробка передач:</strong> {car.transmission}
@@ -368,28 +377,45 @@ const CarDetail: React.FC = () => {
 				<h3>Описание</h3>
 				<p>{car.description}</p>
 			</div>
-			<div
-				className='car-detail__owner'
-				onClick={() => navigate(`/profile/${car.user_id}`)}
-			>
-				<h3>Владелец объявления</h3>
-				<p>
-					<strong>Имя:</strong> {car.user_name} {car.user_surname}
-				</p>
-				<p>
-					<strong>Телефон:</strong> {car.user_phone || 'Не указан'}
-				</p>
-			</div>
-			<div className='car-detail__actions'>
-				<div className='car-detail__favorite' onClick={toggleFavorite}>
-					{isFavorite ? (
-						<HeartFilled style={{ color: 'red' }} />
-					) : (
-						<HeartOutlined />
-					)}
+			{isOwner ? (
+				<div>
+					<h3>Это ваше объявление</h3>
+					<div className='car-item__actions'>
+						<Button
+							type='primary'
+							onClick={() => navigate(`/edit-car/${car.id}`)}
+						>
+							Редактировать
+						</Button>
+						<Button onClick={() => handleDelete(car.id)}>Удалить</Button>
+					</div>
 				</div>
-				<MessageSender receiverId={car.user_id.toString()} />
-			</div>
+			) : (
+				<>
+					<div
+						className='car-detail__owner'
+						onClick={() => navigate(`/profile/${car.user_id}`)}
+					>
+						<h3>Владелец объявления</h3>
+						<p>
+							<strong>Имя:</strong> {car.user_name} {car.user_surname}
+						</p>
+						<p>
+							<strong>Телефон:</strong> {car.user_phone || 'Не указан'}
+						</p>
+					</div>
+					<div className='car-detail__actions'>
+						<div className='car-detail__favorite' onClick={toggleFavorite}>
+							{isFavorite ? (
+								<HeartFilled style={{ color: 'red' }} />
+							) : (
+								<HeartOutlined />
+							)}
+						</div>
+						<MessageSender receiverId={car.user_id.toString()} />
+					</div>
+				</>
+			)}
 			<div className='car-detail__ai-chat'>
 				<h3>Чат с ИИ</h3>
 				<AIChat

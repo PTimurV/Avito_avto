@@ -130,8 +130,8 @@ const CreateAd: React.FC = () => {
 					rules={[{ required: true, message: 'Тип автомобиля обязателен' }]}
 				>
 					<Select onChange={value => handleChange('car_type_id', value)}>
-						<Option value='1'>С пробегом</Option>
-						<Option value='2'>Новые</Option>
+						<Option value='1'>Новые</Option>
+						<Option value='2'>С пробегом</Option>
 					</Select>
 				</Form.Item>
 				<Form.Item
@@ -260,8 +260,8 @@ const CreateAd: React.FC = () => {
 					rules={[{ required: true, message: 'Состояние обязательно' }]}
 				>
 					<Select onChange={value => handleChange('condition_id', value)}>
-						<Option value='1'>Битые</Option>
-						<Option value='2'>Кроме целых</Option>
+						<Option value='1'>Битая</Option>
+						<Option value='2'>Целая</Option>
 					</Select>
 				</Form.Item>
 				<Form.Item

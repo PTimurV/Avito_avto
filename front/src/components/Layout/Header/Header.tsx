@@ -28,9 +28,32 @@ const Header: React.FC = () => {
 					dispatch(setUser(response.data.user))
 				} catch (error) {
 					console.error('Ошибка при проверке токена:', error)
-					localStorage.removeItem('accessToken')
-					navigate('/login')
+					await handleTokenRefresh()
 				}
+			}
+		}
+
+		const handleTokenRefresh = async () => {
+			const refreshToken = localStorage.getItem('refreshToken')
+			if (refreshToken) {
+				try {
+					const response = await axios.post(
+						'http://localhost:3000/api/auth/refresh-token',
+						{},
+						{
+							headers: {
+								Authorization: `Bearer ${refreshToken}`,
+							},
+						}
+					)
+					localStorage.setItem('accessToken', response.data.accessToken)
+					fetchUser() // Повторный вызов для получения данных пользователя
+				} catch (error) {
+					console.error('Ошибка при обновлении токена:', error)
+					handleLogout()
+				}
+			} else {
+				handleLogout()
 			}
 		}
 
@@ -40,6 +63,7 @@ const Header: React.FC = () => {
 	const handleLogout = () => {
 		dispatch(clearUser())
 		localStorage.removeItem('accessToken')
+		localStorage.removeItem('refreshToken')
 		navigate('/login')
 	}
 

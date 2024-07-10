@@ -39,7 +39,11 @@ const ChatRoom: React.FC = () => {
 						},
 					}
 				)
-				setMessages(response.data)
+
+				const messages = response.data.sort((a, b) => a.id - b.id)
+				setMessages(messages)
+
+				console.log(messages)
 
 				// Предполагаем, что первый пользователь, не равный текущему пользователю, является получателем
 				if (response.data.length > 0) {

@@ -3,10 +3,13 @@ import axios from 'axios'
 import { Car } from '../../types'
 import CarItem from '../../components/CarItem/CarItem'
 import './FavoritesPage.css'
+import { useNavigate } from 'react-router-dom'
 
 const FavoritesPage: React.FC = () => {
 	const [favorites, setFavorites] = useState<Car[]>([])
 	const [favoriteIds, setFavoriteIds] = useState<number[]>([])
+
+	const navigate = useNavigate()
 
 	useEffect(() => {
 		const fetchFavorites = async () => {
@@ -89,7 +92,7 @@ const FavoritesPage: React.FC = () => {
 					<CarItem
 						key={car.id}
 						car={car}
-						onClick={() => console.log(car.id)}
+						onClick={() => navigate(`/cars/${car.id}`)}
 						isFavorite={favoriteIds.includes(car.id)}
 						onFavoriteToggle={toggleFavorite}
 					/>
