@@ -1,0 +1,44 @@
+.App {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
+}
+
+.main-content {
+	flex-grow: 1;
+	padding-top: 50px; /* Обновленный отступ сверху */
+}
+
+.home {
+	display: flex;
+	flex-direction: row;
+
+	flex-grow: 1;
+}
+
+.filters {
+	width: 250px;
+	margin-right: 20px;
+	flex-shrink: 0;
+}
+
+.car-list {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+body,
+html,
+#root {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+
+footer {
+	background-color: #f8f9fa;
+	padding: 20px;
+	text-align: center;
+	margin-top: auto; /* Добавлено для того, чтобы футер автоматически занимал нижнюю позицию */
+}

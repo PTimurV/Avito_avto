@@ -1,0 +1,7 @@
+.car-title {
+	cursor: pointer;
+	color: #1890ff;
+}
+.car-title:hover {
+	text-decoration: underline;
+}

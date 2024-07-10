@@ -1,0 +1,23 @@
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 20px;
+	background-color: #f0f2f5;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 50px; /* уменьшенная высота */
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	z-index: 1000;
+}
+
+.nav-buttons > * {
+	margin-left: 10px;
+}
+
+.logo {
+	font-weight: bold;
+	font-size: 1.5rem;
+}

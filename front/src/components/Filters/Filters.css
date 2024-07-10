@@ -1,0 +1,37 @@
+.filters {
+	display: flex;
+	flex-direction: column;
+	width: 250px;
+}
+
+.filter-item {
+	margin-bottom: 15px;
+}
+
+.filter-item label {
+	font-weight: bold;
+}
+
+.filter-item div {
+	display: flex;
+	flex-direction: column;
+}
+
+.filter-item input[type='text'],
+.filter-item input[type='number'],
+.filter-item select {
+	width: 100%;
+	padding: 5px;
+	margin-top: 5px;
+}
+
+.filter-item input[type='checkbox'],
+.filter-item input[type='radio'] {
+	margin-right: 5px;
+}
+
+.filter-item a {
+	color: blue;
+	text-decoration: underline;
+	cursor: pointer;
+}
