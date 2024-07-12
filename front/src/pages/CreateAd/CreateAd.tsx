@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import { PlusOutlined } from '@ant-design/icons'
 import BrandDropdown from '../../components/BrandDropdown/BrandDropdown'
 import ModelDropdown from '../../components/ModelDropdown/ModelDropdown'
-import axios from 'axios'
 import './CreateAd.css'
+import useAxios from '../../AxiosHook/useAxios'
+import withErrorBoundary from '../../components/Hoc/withErrorBoundary'
 
 const { TextArea } = Input
 const { Option } = Select
@@ -51,6 +52,7 @@ const CreateAd: React.FC = () => {
 		adress: '',
 		price: '',
 	})
+	const { post } = useAxios()
 
 	const handleChange = (key: string, value: any) => {
 		setAdDetails(prevDetails => ({
@@ -85,16 +87,12 @@ const CreateAd: React.FC = () => {
 			const requestData = { ...values, photos }
 			const accessToken = localStorage.getItem('accessToken')
 			if (accessToken) {
-				const response = await axios.post(
-					'http://localhost:3000/api/cars',
-					requestData,
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					}
-				)
-				const { id } = response.data
+				const data = await post('/cars', requestData, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				})
+				const { id } = data
 				if (id) {
 					navigate(`/cars/${id}`)
 				} else {
@@ -350,4 +348,4 @@ const CreateAd: React.FC = () => {
 	)
 }
 
-export default CreateAd
+export default withErrorBoundary(CreateAd)

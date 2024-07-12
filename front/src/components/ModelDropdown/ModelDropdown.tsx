@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import { Select } from 'antd'
-
 const { Option } = Select
+import useAxios from '../../AxiosHook/useAxios'
 
 interface ModelDropdownProps {
 	brandId: number | null
@@ -17,18 +16,18 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({
 }) => {
 	const [models, setModels] = useState<{ id: number; name: string }[]>([])
 	const [selectedModel, setSelectedModel] = useState<string>('')
+	const { get } = useAxios()
 
 	useEffect(() => {
 		console.log('ModelDropdown useEffect triggered with brandId:', brandId)
+
 		const fetchModels = async () => {
 			if (brandId !== null) {
 				try {
 					console.log('Fetching models for brand ID:', brandId)
-					const response = await axios.get(
-						`http://localhost:3000/api/models?brandId=${brandId}`
-					)
-					console.log('Fetched models:', response.data)
-					setModels(response.data)
+					const data = await get(`/models?brandId=${brandId}`)
+					console.log('Fetched models:', data)
+					setModels(data)
 				} catch (error) {
 					console.error('Ошибка при получении данных моделей:', error)
 				}

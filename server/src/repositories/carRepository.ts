@@ -120,13 +120,16 @@ export const getAllCars = async (
 			query.whereIn('c.manufacturer_id', manufacturers)
 		}
 		if (filters.engine_type) {
-			query.where('c.engine_type_id', '=', Number(filters.engine_type))
+			const engineType = filters.engine_type.split(',').map(Number)
+			query.whereIn('c.engine_type_id', engineType)
 		}
 		if (filters.drive) {
-			query.where('c.drive_id', '=', Number(filters.drive))
+			const driveType = filters.drive.split(',').map(Number)
+			query.whereIn('c.drive_id', driveType)
 		}
 		if (filters.transmission) {
-			query.where('c.transmission_id', '=', Number(filters.transmission))
+			const transmissionType = filters.transmission.split(',').map(Number)
+			query.whereIn('c.transmission_id', transmissionType)
 		}
 		if (filters.condition) {
 			query.where('c.condition_id', '=', Number(filters.condition))
@@ -208,13 +211,16 @@ export const countAllCars = async (filters: any) => {
 			query.whereIn('c.manufacturer_id', manufacturers)
 		}
 		if (filters.engine_type) {
-			query.where('c.engine_type_id', '=', Number(filters.engine_type))
+			const engineType = filters.engine_type.split(',').map(Number)
+			query.whereIn('c.engine_type_id', engineType)
 		}
 		if (filters.drive) {
-			query.where('c.drive_id', '=', Number(filters.drive))
+			const driveType = filters.drive.split(',').map(Number)
+			query.whereIn('c.drive_id', driveType)
 		}
 		if (filters.transmission) {
-			query.where('c.transmission_id', '=', Number(filters.transmission))
+			const transmissionType = filters.transmission.split(',').map(Number)
+			query.whereIn('c.transmission_id', transmissionType)
 		}
 		if (filters.condition) {
 			query.where('c.condition_id', '=', Number(filters.condition))

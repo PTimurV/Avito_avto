@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 import { Car } from '../../types'
 import CarItem from '../../components/CarItem/CarItem'
 import './Recommendations.css'
+import useAxios from '../../AxiosHook/useAxios'
+import withErrorBoundary from '../../components/Hoc/withErrorBoundary'
 
 const Recommendations: React.FC = () => {
 	const [recommendations, setRecommendations] = useState<Car[]>([])
 	const [favorites, setFavorites] = useState<number[]>([])
+	const navigate = useNavigate()
+	const { get, post } = useAxios()
 
 	const fetchFavorites = async () => {
 		try {
@@ -15,15 +19,12 @@ const Recommendations: React.FC = () => {
 				throw new Error('Нет токена доступа')
 			}
 
-			const response = await axios.get(
-				'http://localhost:3000/api/favorites/user',
-				{
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-					},
-				}
-			)
-			setFavorites(response.data.map((favorite: any) => favorite.id))
+			const data = await get('/favorites/user', {
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			})
+			setFavorites(data.map((favorite: any) => favorite.id))
 		} catch (error) {
 			console.error('Ошибка при получении избранных объявлений:', error)
 		}
@@ -37,8 +38,8 @@ const Recommendations: React.FC = () => {
 			}
 
 			if (favorites.includes(carId)) {
-				await axios.post(
-					'http://localhost:3000/api/favorites/remove',
+				await post(
+					'/favorites/remove',
 					{ carId: carId },
 					{
 						headers: {
@@ -48,8 +49,8 @@ const Recommendations: React.FC = () => {
 				)
 				setFavorites(favorites.filter(id => id !== carId))
 			} else {
-				await axios.post(
-					'http://localhost:3000/api/favorites/add',
+				await post(
+					'/favorites/add',
 					{ carId: carId },
 					{
 						headers: {
@@ -69,15 +70,12 @@ const Recommendations: React.FC = () => {
 			try {
 				const accessToken = localStorage.getItem('accessToken')
 				if (accessToken) {
-					const response = await axios.get(
-						'http://localhost:3000/api/recommendations',
-						{
-							headers: {
-								Authorization: `Bearer ${accessToken}`,
-							},
-						}
-					)
-					setRecommendations(response.data)
+					const data = await get('/recommendations', {
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
+					})
+					setRecommendations(data)
 				}
 			} catch (error) {
 				console.error('Ошибка при получении рекомендаций:', error)
@@ -96,7 +94,7 @@ const Recommendations: React.FC = () => {
 					<CarItem
 						key={car.id}
 						car={car}
-						onClick={() => (window.location.href = `/cars/${car.id}`)}
+						onClick={() => navigate(`/cars/${car.id}`)}
 						isFavorite={favorites.includes(car.id)}
 						onFavoriteToggle={toggleFavorite}
 					/>
@@ -106,4 +104,4 @@ const Recommendations: React.FC = () => {
 	)
 }
 
-export default Recommendations
+export default withErrorBoundary(Recommendations)

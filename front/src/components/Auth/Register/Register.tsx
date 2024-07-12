@@ -1,29 +1,33 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Form, Input, Button } from 'antd'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import { useAppDispatch } from '../../../hooks'
 import { setUser } from '../../../store/userSlice'
 import './Register.css'
+import useAxios from '../../../AxiosHook/useAxios'
+import ErrorMessage from '../../ErrorMessage/ErrorMessage' // импортируем компонент ошибки
 
 const Register: React.FC = () => {
 	const navigate = useNavigate()
 	const dispatch = useAppDispatch()
+	const { post } = useAxios()
+	const [errorMessage, setErrorMessage] = useState('')
 
 	const onFinish = async (values: any) => {
 		try {
-			const response = await axios.post(
-				'http://localhost:3000/api/auth/register',
-				values,
-				{ withCredentials: true }
-			)
-			const userData = response.data.user
-			const accessToken = response.data.accessToken
+			const data = await post('/auth/register', values, {
+				withCredentials: true,
+			})
+			const userData = data.user
+			const accessToken = data.accessToken
+			const refreshToken = data.refreshToken
 			localStorage.setItem('accessToken', accessToken)
+			localStorage.setItem('refreshToken', refreshToken)
 			dispatch(setUser(userData))
 			navigate('/')
 		} catch (error) {
 			console.error('Ошибка при регистрации:', error)
+			setErrorMessage('Ошибка при регистрации: ' + error.response.data)
 		}
 	}
 
@@ -88,6 +92,7 @@ const Register: React.FC = () => {
 					</Button>
 				</Form.Item>
 			</Form>
+			<ErrorMessage message={errorMessage} />
 		</div>
 	)
 }

@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import { Car } from '../../types'
 import CarItem from '../../components/CarItem/CarItem'
 import './FavoritesPage.css'
 import { useNavigate } from 'react-router-dom'
+import useAxios from '../../AxiosHook/useAxios'
+import withErrorBoundary from '../../components/Hoc/withErrorBoundary'
 
 const FavoritesPage: React.FC = () => {
 	const [favorites, setFavorites] = useState<Car[]>([])
 	const [favoriteIds, setFavoriteIds] = useState<number[]>([])
+	const { get, post } = useAxios()
 
 	const navigate = useNavigate()
 
@@ -19,16 +21,12 @@ const FavoritesPage: React.FC = () => {
 					throw new Error('Нет токена доступа')
 				}
 
-				const response = await axios.get(
-					'http://localhost:3000/api/favorites/user',
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					}
-				)
+				const favoriteCars = await get('/favorites/user', {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				})
 
-				const favoriteCars = response.data
 				setFavorites(favoriteCars)
 				setFavoriteIds(favoriteCars.map((car: Car) => car.id))
 			} catch (error) {
@@ -47,8 +45,8 @@ const FavoritesPage: React.FC = () => {
 			}
 
 			if (favoriteIds.includes(carId)) {
-				await axios.post(
-					'http://localhost:3000/api/favorites/remove',
+				await post(
+					'/favorites/remove',
 					{ carId: carId },
 					{
 						headers: {
@@ -59,8 +57,8 @@ const FavoritesPage: React.FC = () => {
 				setFavoriteIds(favoriteIds.filter(id => id !== carId))
 				setFavorites(favorites.filter(car => car.id !== carId))
 			} else {
-				await axios.post(
-					'http://localhost:3000/api/favorites/add',
+				await post(
+					'/favorites/add',
 					{ carId: carId },
 					{
 						headers: {
@@ -68,16 +66,13 @@ const FavoritesPage: React.FC = () => {
 						},
 					}
 				)
-				const newFavoriteResponse = await axios.get(
-					`http://localhost:3000/api/cars/${carId}`,
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					}
-				)
+				const newFavorite = await get(`/cars/${carId}`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				})
 				setFavoriteIds([...favoriteIds, carId])
-				setFavorites([...favorites, newFavoriteResponse.data])
+				setFavorites([...favorites, newFavorite])
 			}
 		} catch (error) {
 			console.error('Ошибка при изменении избранного:', error)
@@ -102,4 +97,4 @@ const FavoritesPage: React.FC = () => {
 	)
 }
 
-export default FavoritesPage
+export default withErrorBoundary(FavoritesPage)

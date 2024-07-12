@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import { Button, Card } from 'antd'
 import { Car, User } from '../../types'
 import MessageSender from '../../components/MessageSender/MessageSender'
 import './ProfileInfo.css'
+import withErrorBoundary from '../../components/Hoc/withErrorBoundary'
+
+import useAxios from '../../AxiosHook/useAxios'
 
 interface ProfileData {
 	user: User
@@ -16,6 +18,7 @@ const ProfileInfo: React.FC = () => {
 	const { id } = useParams<{ id: string }>()
 	const navigate = useNavigate()
 	const [profile, setProfile] = useState<ProfileData | null>(null)
+	const { get, del } = useAxios()
 
 	useEffect(() => {
 		const fetchProfile = async () => {
@@ -25,15 +28,12 @@ const ProfileInfo: React.FC = () => {
 					throw new Error('Нет токена доступа')
 				}
 
-				const response = await axios.get(
-					`http://localhost:3000/api/user/profile/${id}`,
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					}
-				)
-				setProfile(response.data)
+				const data = await get(`/user/profile/${id}`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				})
+				setProfile(data)
 			} catch (error) {
 				console.error('Ошибка при получении данных профиля:', error)
 			}
@@ -49,13 +49,12 @@ const ProfileInfo: React.FC = () => {
 				throw new Error('Нет токена доступа')
 			}
 
-			await axios.delete(`http://localhost:3000/api/cars/${carId}`, {
+			await del(`/cars/${carId}`, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 				},
 			})
 
-			// Обновляем состояние, чтобы удалить объявление из списка
 			setProfile(prevProfile => {
 				if (!prevProfile) return prevProfile
 				return {
@@ -82,42 +81,60 @@ const ProfileInfo: React.FC = () => {
 				<p>
 					<strong>Телефон:</strong> {profile.user.phone || 'Не указан'}
 				</p>
+				{profile.owner === 0 && <MessageSender receiverId={id} />}
 			</div>
-			{profile.owner === 0 && <MessageSender receiverId={id} />}
 			<div className='profile-info__cars'>
 				<h2>Мои объявления</h2>
 				{profile.cars.map(car => (
 					<Card key={car.id} className='car-item'>
-						<div className='car-item__image'>
-							<img
-								src={
-									car.photos.length > 0
-										? car.photos[0]
-										: '/images/placeholder.jpg'
-								}
-								alt='Car'
-							/>
-						</div>
-						<div className='car-item__details'>
-							<h3
+						<div className='car-item__header'>
+							<div
+								className='car-item__images'
 								onClick={() => navigate(`/cars/${car.id}`)}
-								className='car-title'
-							>{`${car.brand} ${car.model} ${car.release_year}, ${car.mileage} км`}</h3>
-							<p>{car.description}</p>
-							<p>
-								<strong>{car.price} ₽</strong>
-							</p>
-							{profile.owner === 1 && (
-								<div className='car-item__actions'>
-									<Button
-										type='primary'
-										onClick={() => navigate(`/edit-car/${car.id}`)}
-									>
-										Редактировать
-									</Button>
-									<Button onClick={() => handleDelete(car.id)}>Удалить</Button>
+							>
+								<img
+									src={
+										car.photos.length > 0
+											? car.photos[0]
+											: '/images/placeholder.jpg'
+									}
+									alt='Car'
+									className='car-item__main-image'
+								/>
+								<div className='car-item__small-images'>
+									{car.photos.slice(1, 3).map((src, index) => (
+										<img
+											key={index}
+											src={src}
+											alt='Car'
+											className='car-item__small-image'
+										/>
+									))}
 								</div>
-							)}
+							</div>
+							<div
+								className='car-item__details'
+								onClick={() => navigate(`/cars/${car.id}`)}
+							>
+								<h3 className='car-title'>{`${car.brand} ${car.model} ${car.release_year}, ${car.mileage} км`}</h3>
+								<p>{car.description}</p>
+								<p>
+									<strong>{car.price} ₽</strong>
+								</p>
+								{profile.owner === 1 && (
+									<div className='car-item__actions'>
+										<Button
+											type='primary'
+											onClick={() => navigate(`/edit-car/${car.id}`)}
+										>
+											Редактировать
+										</Button>
+										<Button onClick={() => handleDelete(car.id)}>
+											Удалить
+										</Button>
+									</div>
+								)}
+							</div>
 						</div>
 					</Card>
 				))}
@@ -126,4 +143,4 @@ const ProfileInfo: React.FC = () => {
 	)
 }
 
-export default ProfileInfo
+export default withErrorBoundary(ProfileInfo)

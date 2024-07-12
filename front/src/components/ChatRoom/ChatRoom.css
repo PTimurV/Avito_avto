@@ -1,0 +1,45 @@
+.chat-room {
+	max-width: 800px;
+	min-width: 600px;
+	margin: 0 auto;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.receiver-info {
+	border: 1px solid #e8e8e8;
+	border-radius: 8px;
+	padding: 20px;
+	background-color: #fff;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	margin-bottom: 20px;
+}
+
+.message-list {
+	background-color: #fff;
+	padding: 20px;
+	border: 1px solid #e8e8e8;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	flex-grow: 1;
+	overflow-y: auto;
+}
+
+.message-list .ant-list-item {
+	padding: 10px 0;
+}
+
+.ant-list-item-meta-title {
+	font-weight: bold;
+}
+
+.ant-input {
+	border-radius: 8px;
+}
+
+.ant-btn {
+	align-self: flex-end;
+	border-radius: 8px;
+}

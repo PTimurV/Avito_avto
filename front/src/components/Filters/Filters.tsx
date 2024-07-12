@@ -53,10 +53,6 @@ const Filters: React.FC<FiltersProps> = ({ onFiltersChange }) => {
 		search: '',
 	})
 
-	useEffect(() => {
-		console.log('Filters component updated:', filters)
-	}, [filters])
-
 	const handleFilterChange = (key: string, value: any) => {
 		setFilters(prevFilters => {
 			const updatedFilters = { ...prevFilters, [key]: value }

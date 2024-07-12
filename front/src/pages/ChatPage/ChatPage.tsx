@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { Button, List } from 'antd'
 import { useAppSelector } from '../../hooks'
 import { Chat } from '../../types'
 import './ChatPage.css'
+import useAxios from '../../AxiosHook/useAxios'
+import withErrorBoundary from '../../components/Hoc/withErrorBoundary'
 
 interface User {
 	id: number
@@ -17,6 +18,7 @@ const ChatPage: React.FC = () => {
 	const [users, setUsers] = useState<{ [key: number]: User }>({})
 	const user = useAppSelector(state => state.user.user)
 	const navigate = useNavigate()
+	const { get } = useAxios()
 
 	useEffect(() => {
 		const fetchChats = async () => {
@@ -26,31 +28,26 @@ const ChatPage: React.FC = () => {
 					throw new Error('Нет токена доступа')
 				}
 
-				const response = await axios.get(
-					'http://localhost:3000/api/chat/user-chats',
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					}
-				)
-				setChats(response.data)
+				const chatsData = await get('/chat/user-chats', {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				})
+				setChats(chatsData)
+
 				// Fetch user details for each chat
-				response.data.forEach(async (chat: Chat) => {
+				chatsData.forEach(async (chat: Chat) => {
 					const otherUserId =
 						chat.user1_id === user?.id ? chat.user2_id : chat.user1_id
 					if (!users[otherUserId]) {
-						const userResponse = await axios.get(
-							`http://localhost:3000/api/user/profile/${otherUserId}`,
-							{
-								headers: {
-									Authorization: `Bearer ${accessToken}`,
-								},
-							}
-						)
+						const userData = await get(`/user/profile/${otherUserId}`, {
+							headers: {
+								Authorization: `Bearer ${accessToken}`,
+							},
+						})
 						setUsers(prevUsers => ({
 							...prevUsers,
-							[otherUserId]: userResponse.data.user,
+							[otherUserId]: userData.user,
 						}))
 					}
 				})
@@ -96,4 +93,4 @@ const ChatPage: React.FC = () => {
 	)
 }
 
-export default ChatPage
+export default withErrorBoundary(ChatPage)

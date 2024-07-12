@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import axios from 'axios'
-import { Button, Input, List } from 'antd'
+import { Button, Input, List, Card } from 'antd'
 import { useAppSelector } from '../../hooks'
 import { Message } from '../../types'
 import './ChatRoom.css'
-
+import { API_BASE_URL } from '../../config'
 const { TextArea } = Input
+import useAxios from '../../AxiosHook/useAxios'
 
 interface User {
 	id: number
 	name: string
 	surname: string
+	phone: string
 }
 
 const ChatRoom: React.FC = () => {
@@ -23,6 +25,8 @@ const ChatRoom: React.FC = () => {
 	const user = useAppSelector(state => state.user.user)
 	const [receiverId, setReceiverId] = useState<number | null>(null)
 
+	const { get } = useAxios()
+
 	useEffect(() => {
 		const fetchMessages = async () => {
 			try {
@@ -31,19 +35,14 @@ const ChatRoom: React.FC = () => {
 					throw new Error('Нет токена доступа')
 				}
 
-				const response = await axios.get(
-					`http://localhost:3000/api/chat/history/${id}`,
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					}
-				)
+				const response = await axios.get(`${API_BASE_URL}/chat/history/${id}`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				})
 
 				const messages = response.data.sort((a, b) => a.id - b.id)
 				setMessages(messages)
-
-				console.log(messages)
 
 				// Предполагаем, что первый пользователь, не равный текущему пользователю, является получателем
 				if (response.data.length > 0) {
@@ -56,7 +55,7 @@ const ChatRoom: React.FC = () => {
 
 					if (otherUserId) {
 						const userResponse = await axios.get(
-							`http://localhost:3000/api/user/profile/${otherUserId}`,
+							`${API_BASE_URL}/user/profile/${otherUserId}`,
 							{
 								headers: {
 									Authorization: `Bearer ${accessToken}`,
@@ -106,6 +105,16 @@ const ChatRoom: React.FC = () => {
 
 	return (
 		<div className='chat-room'>
+			{receiver && (
+				<Card className='receiver-info'>
+					<p>
+						<strong>Имя:</strong> {receiver.name} {receiver.surname}
+					</p>
+					<p>
+						<strong>Телефон:</strong> {receiver.phone}
+					</p>
+				</Card>
+			)}
 			<List
 				className='message-list'
 				itemLayout='horizontal'
