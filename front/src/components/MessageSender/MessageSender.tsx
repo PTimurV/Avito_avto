@@ -1,13 +1,13 @@
 import React, { useState } from 'react'
-import axios from 'axios'
 import { Button, Input } from 'antd'
-
+import useAxios from '../../AxiosHook/useAxios'
 interface MessageSenderProps {
 	receiverId: string
 }
 
 const MessageSender: React.FC<MessageSenderProps> = ({ receiverId }) => {
 	const [message, setMessage] = useState('')
+	const { post } = useAxios()
 
 	const handleSendMessage = async () => {
 		try {
@@ -16,8 +16,8 @@ const MessageSender: React.FC<MessageSenderProps> = ({ receiverId }) => {
 				throw new Error('Нет токена доступа')
 			}
 
-			await axios.post(
-				'http://localhost:3000/api/chat/send-message',
+			await post(
+				'/chat/send-message',
 				{
 					receiverId,
 					message,

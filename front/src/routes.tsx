@@ -1,4 +1,3 @@
-// routes.tsx
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Home from './pages/Home/Home'
@@ -14,6 +13,7 @@ import ChatRoom from './components/ChatRoom/ChatRoom'
 import FavoritesPage from './pages/FavoritesPage/FavoritesPage'
 import ViewHistory from './pages/ViewHistory/ViewHistory'
 import Recommendations from './pages/Recommendations/Recommendations'
+import withAuth from './components/Hoc/withAuth'
 
 const AppRoutes: React.FC = () => {
 	return (
@@ -21,16 +21,43 @@ const AppRoutes: React.FC = () => {
 			<Route path='/' element={<Home />} />
 			<Route path='/login' element={<LoginPage />} />
 			<Route path='/register' element={<RegisterPage />} />
-			<Route path='/cars/:id' element={<CarDetail />} />
-			<Route path='/create-ad' element={<CreateAd />} />
-			<Route path='/settings' element={<Settings />} />
-			<Route path='/profile/:id' element={<ProfileInfo />} />
-			<Route path='/edit-car/:id' element={<EditCar />} />
-			<Route path='/chats' element={<ChatPage />} />
-			<Route path='/chat/:id' element={<ChatRoom />} />
-			<Route path='/favorites' element={<FavoritesPage />} />
-			<Route path='/view-history' element={<ViewHistory />} />
-			<Route path='/recommendations' element={<Recommendations />} />
+			<Route
+				path='/cars/:id'
+				element={React.createElement(withAuth(CarDetail))}
+			/>
+			<Route
+				path='/create-ad'
+				element={React.createElement(withAuth(CreateAd))}
+			/>
+			<Route
+				path='/settings'
+				element={React.createElement(withAuth(Settings))}
+			/>
+			<Route
+				path='/profile/:id'
+				element={React.createElement(withAuth(ProfileInfo))}
+			/>
+			<Route
+				path='/edit-car/:id'
+				element={React.createElement(withAuth(EditCar))}
+			/>
+			<Route path='/chats' element={React.createElement(withAuth(ChatPage))} />
+			<Route
+				path='/chat/:id'
+				element={React.createElement(withAuth(ChatRoom))}
+			/>
+			<Route
+				path='/favorites'
+				element={React.createElement(withAuth(FavoritesPage))}
+			/>
+			<Route
+				path='/view-history'
+				element={React.createElement(withAuth(ViewHistory))}
+			/>
+			<Route
+				path='/recommendations'
+				element={React.createElement(withAuth(Recommendations))}
+			/>
 		</Routes>
 	)
 }

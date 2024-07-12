@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-import axios from 'axios'
 import { Select } from 'antd'
-
 const { Option } = Select
+import useAxios from '../../AxiosHook/useAxios'
 
 interface BrandDropdownProps {
 	onChange: (value: number, brandId: number) => void
@@ -12,12 +11,13 @@ interface BrandDropdownProps {
 const BrandDropdown: React.FC<BrandDropdownProps> = ({ onChange, value }) => {
 	const [brands, setBrands] = useState<{ id: number; name: string }[]>([])
 	const [selectedBrand, setSelectedBrand] = useState<string>('')
+	const { get } = useAxios()
 
 	const fetchBrands = async () => {
 		try {
-			const response = await axios.get('http://localhost:3000/api/brands')
-			console.log('Fetched brands:', response.data)
-			setBrands(response.data)
+			const data = await get('/brands')
+			console.log('Fetched brands:', data)
+			setBrands(data)
 		} catch (error) {
 			console.error('Ошибка при получении данных марок:', error)
 		}

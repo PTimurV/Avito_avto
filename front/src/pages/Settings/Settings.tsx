@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import { Input, Button, Form } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
 import { setUser } from '../../store/userSlice'
 import { RootState } from '../../store'
 import './Settings.css'
+import useAxios from '../../AxiosHook/useAxios'
+import withErrorBoundary from '../../components/Hoc/withErrorBoundary'
 
 const Settings: React.FC = () => {
 	const dispatch = useDispatch()
@@ -17,21 +18,19 @@ const Settings: React.FC = () => {
 	})
 	const [loading, setLoading] = useState(true)
 	const [editing, setEditing] = useState(false)
+	const { get, put } = useAxios()
 
 	useEffect(() => {
 		const fetchProfile = async () => {
 			const accessToken = localStorage.getItem('accessToken')
 			if (accessToken) {
 				try {
-					const response = await axios.get(
-						'http://localhost:3000/api/user/profile',
-						{
-							headers: {
-								Authorization: `Bearer ${accessToken}`,
-							},
-						}
-					)
-					setProfile(response.data)
+					const data = await get('/user/profile', {
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+						},
+					})
+					setProfile(data)
 					setLoading(false)
 				} catch (error) {
 					console.error('Ошибка при получении профиля:', error)
@@ -56,7 +55,7 @@ const Settings: React.FC = () => {
 		const accessToken = localStorage.getItem('accessToken')
 		if (accessToken) {
 			try {
-				await axios.put('http://localhost:3000/api/user/profile', profile, {
+				await put('/user/profile', profile, {
 					headers: {
 						Authorization: `Bearer ${accessToken}`,
 					},
@@ -142,4 +141,4 @@ const Settings: React.FC = () => {
 	)
 }
 
-export default Settings
+export default withErrorBoundary(Settings)

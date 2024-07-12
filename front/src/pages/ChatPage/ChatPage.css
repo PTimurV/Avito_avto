@@ -1,0 +1,54 @@
+.chat-page {
+	max-width: 800px;
+	min-width: 600px;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+.chat-page h1 {
+	text-align: center;
+	margin-bottom: 20px;
+	font-size: 2rem;
+	color: #4a4a4a;
+}
+
+.chat-page .ant-list-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 15px;
+	border: 1px solid #e8e8e8;
+	border-radius: 8px;
+	margin-bottom: 10px;
+	background-color: #fff;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	transition: all 0.3s;
+	width: 100%;
+}
+
+.chat-page .ant-list-item:hover {
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.chat-page .ant-list-item-meta-title {
+	font-size: 1.2rem;
+	color: #1890ff;
+	font-weight: bold;
+}
+
+.chat-page .ant-list-item-meta-title:hover {
+	text-decoration: underline;
+}
+
+.chat-page .ant-btn {
+	background-color: #1890ff;
+	border: none;
+	color: #fff;
+	border-radius: 8px;
+	transition: all 0.3s;
+}
+
+.chat-page .ant-btn:hover {
+	background-color: #40a9ff;
+	border: none;
+}

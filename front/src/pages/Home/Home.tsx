@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import CarItem from '../../components/CarItem/CarItem'
 import { Car } from '../../types'
 import Filters from '../../components/Filters/Filters'
 import Pagination from '../../components/Pagination/Pagination'
 import './Home.css'
+import useAxios from '../../AxiosHook/useAxios'
+import withErrorBoundary from '../../components/Hoc/withErrorBoundary'
 
 const Home: React.FC = () => {
 	const [cars, setCars] = useState<Car[]>([])
@@ -14,6 +15,7 @@ const Home: React.FC = () => {
 	const [page, setPage] = useState(1)
 	const [totalPages, setTotalPages] = useState(1)
 	const navigate = useNavigate()
+	const { get, post } = useAxios()
 
 	const fetchCars = async (page: number, filters: any) => {
 		try {
@@ -45,11 +47,9 @@ const Home: React.FC = () => {
 			if (filters.ownersTo) params.append('owners_by_PTS_to', filters.ownersTo)
 			if (filters.search) params.append('search', filters.search)
 
-			const response = await axios.get(
-				`http://localhost:3000/api/cars?${params.toString()}`
-			)
-			setCars(response.data.cars)
-			setTotalPages(response.data.pages)
+			const data = await get(`/cars?${params.toString()}`)
+			setCars(data.cars)
+			setTotalPages(data.pages)
 		} catch (error) {
 			console.error('Ошибка при получении данных:', error)
 		}
@@ -62,15 +62,12 @@ const Home: React.FC = () => {
 				throw new Error('Нет токена доступа')
 			}
 
-			const response = await axios.get(
-				'http://localhost:3000/api/favorites/user',
-				{
-					headers: {
-						Authorization: `Bearer ${accessToken}`,
-					},
-				}
-			)
-			setFavorites(response.data.map((favorite: any) => favorite.id))
+			const data = await get('/favorites/user', {
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+				},
+			})
+			setFavorites(data.map((favorite: any) => favorite.id))
 		} catch (error) {
 			console.error('Ошибка при получении избранных объявлений:', error)
 		}
@@ -84,8 +81,8 @@ const Home: React.FC = () => {
 			}
 
 			if (favorites.includes(carId)) {
-				await axios.post(
-					'http://localhost:3000/api/favorites/remove',
+				await post(
+					'/favorites/remove',
 					{ carId: carId },
 					{
 						headers: {
@@ -95,8 +92,8 @@ const Home: React.FC = () => {
 				)
 				setFavorites(favorites.filter(id => id !== carId))
 			} else {
-				await axios.post(
-					'http://localhost:3000/api/favorites/add',
+				await post(
+					'/favorites/add',
 					{ carId: carId },
 					{
 						headers: {
@@ -129,8 +126,10 @@ const Home: React.FC = () => {
 
 	return (
 		<div className='home'>
-			<Filters onFiltersChange={handleFiltersChange} />
-			<div className='car-list'>
+			<div className='home__filters'>
+				<Filters onFiltersChange={handleFiltersChange} />
+			</div>
+			<div className='home__car-list'>
 				{cars.map(car => (
 					<CarItem
 						key={car.id}
@@ -140,14 +139,14 @@ const Home: React.FC = () => {
 						onFavoriteToggle={toggleFavorite}
 					/>
 				))}
+				<Pagination
+					page={page}
+					totalPages={totalPages}
+					onPageChange={handlePageChange}
+				/>
 			</div>
-			<Pagination
-				page={page}
-				totalPages={totalPages}
-				onPageChange={handlePageChange}
-			/>
 		</div>
 	)
 }
 
-export default Home
+export default withErrorBoundary(Home)

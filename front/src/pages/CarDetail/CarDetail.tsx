@@ -9,6 +9,8 @@ import './CarDetail.css'
 import AIChat from '../../components/AIChat/AIChat'
 import CarImageSlider from '../../components/CarImageSlider/CarImageSlider'
 import { Button } from 'antd'
+import useAxios from '../../AxiosHook/useAxios'
+import withErrorBoundary from '../../components/Hoc/withErrorBoundary'
 
 interface CarDetail {
 	id: number
@@ -64,16 +66,17 @@ const CarDetail: React.FC = () => {
 	const [vinInfo, setVinInfo] = useState<VinInfo | null>(null)
 	const [isFavorite, setIsFavorite] = useState<boolean>(false)
 	const currentUser = useSelector((state: RootState) => state.user.user)
+	const { get, post, del } = useAxios()
 
 	const fetchCar = async () => {
 		try {
-			const response = await axios.get(`http://localhost:3000/api/cars/${id}`)
-			setCar(response.data)
+			const carData = await get(`/cars/${id}`)
+			setCar(carData)
 
 			const accessToken = localStorage.getItem('accessToken')
 			if (accessToken) {
-				await axios.post(
-					'http://localhost:3000/api/view-history/add',
+				await post(
+					'/view-history/add',
 					{ carId: id },
 					{
 						headers: {
@@ -81,23 +84,20 @@ const CarDetail: React.FC = () => {
 						},
 					}
 				)
-				const favoritesResponse = await axios.get(
-					'http://localhost:3000/api/favorites/user',
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					}
-				)
-				const favoriteCars = favoritesResponse.data.map(
-					(favorite: any) => favorite.id
-				)
+
+				const favoritesData = await get('/favorites/user', {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				})
+
+				const favoriteCars = favoritesData.map((favorite: any) => favorite.id)
 				setIsFavorite(favoriteCars.includes(parseInt(id)))
 			}
 
-			if (response.data.VIN) {
+			if (carData.VIN) {
 				const vinResponse = await axios.get(
-					`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/${response.data.VIN}?format=json`
+					`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVin/${carData.VIN}?format=json`
 				)
 				const vinData = vinResponse.data.Results
 
@@ -165,7 +165,7 @@ const CarDetail: React.FC = () => {
 				throw new Error('Нет токена доступа')
 			}
 
-			await axios.delete(`http://localhost:3000/api/cars/${carId}`, {
+			await del(`/cars/${carId}`, {
 				headers: {
 					Authorization: `Bearer ${accessToken}`,
 				},
@@ -183,8 +183,8 @@ const CarDetail: React.FC = () => {
 			}
 
 			if (isFavorite) {
-				await axios.post(
-					'http://localhost:3000/api/favorites/remove',
+				await post(
+					'/favorites/remove',
 					{ carId: id },
 					{
 						headers: {
@@ -194,8 +194,8 @@ const CarDetail: React.FC = () => {
 				)
 				setIsFavorite(false)
 			} else {
-				await axios.post(
-					'http://localhost:3000/api/favorites/add',
+				await post(
+					'/favorites/add',
 					{ carId: id },
 					{
 						headers: {
@@ -222,208 +222,213 @@ const CarDetail: React.FC = () => {
 
 	return (
 		<div className='car-detail'>
-			<CarImageSlider photos={car.photos} />
-			<div className='car-detail__info'>
-				<h1>{`${car.brand} ${car.model} ${car.release_year}, ${car.mileage} км`}</h1>
-				<h2>{`${car.price} ₽`}</h2>
-			</div>
-			<div className='car-detail__characteristics'>
-				<h3>Характеристики</h3>
-				<ul>
-					<li>
-						<strong>Год выпуска:</strong> {car.release_year}
-					</li>
-					<li>
-						<strong>Тип двигателя:</strong> {car.engine_type}
-					</li>
-					<li>
-						<strong>Коробка передач:</strong> {car.transmission}
-					</li>
-					<li>
-						<strong>Привод:</strong> {car.drive}
-					</li>
-					<li>
-						<strong>Цвет:</strong> {car.color}
-					</li>
-					<li>
-						<strong>Состояние:</strong> {car.condition}
-					</li>
-					<li>
-						<strong>Владельцы по ПТС:</strong> {car.owners_by_PTS}
-					</li>
-					<li>
-						<strong>VIN:</strong> {car.VIN}
-					</li>
-					<li>
-						<strong>Производитель:</strong> {car.manufacturer}
-					</li>
-					<li>
-						<strong>Тип автомобиля:</strong> {car.car_type}
-					</li>
-				</ul>
-			</div>
-			{vinInfo && (
-				<div className='car-detail__vin-info'>
-					<h3>Информация по VIN</h3>
+			<div className='car-detail__left'>
+				<CarImageSlider photos={car.photos} />
+				<div className='car-detail__info'>
+					<h1>{`${car.brand} ${car.model} ${car.release_year}, ${car.mileage} км`}</h1>
+					<h2>{`${car.price} ₽`}</h2>
+				</div>
+				<div className='car-detail__characteristics'>
+					<h3>Характеристики</h3>
 					<ul>
-						{vinInfo.ErrorText && (
-							<li>
-								<strong>Текст ошибки:</strong> {vinInfo.ErrorText}
-							</li>
-						)}
-						{vinInfo.VehicleDescriptor && (
-							<li>
-								<strong>Описание транспортного средства:</strong>{' '}
-								{vinInfo.VehicleDescriptor}
-							</li>
-						)}
-						{vinInfo.Trim && (
-							<li>
-								<strong>Комплектация:</strong> {vinInfo.Trim}
-							</li>
-						)}
-						{vinInfo.BodyClass && (
-							<li>
-								<strong>Класс кузова:</strong> {vinInfo.BodyClass}
-							</li>
-						)}
-						{vinInfo.Doors && (
-							<li>
-								<strong>Количество дверей:</strong> {vinInfo.Doors}
-							</li>
-						)}
-						{vinInfo.GrossVehicleWeightRatingFrom && (
-							<li>
-								<strong>Рейтинг полной массы (начало):</strong>{' '}
-								{vinInfo.GrossVehicleWeightRatingFrom}
-							</li>
-						)}
-						{vinInfo.GrossVehicleWeightRatingTo && (
-							<li>
-								<strong>Рейтинг полной массы (конец):</strong>{' '}
-								{vinInfo.GrossVehicleWeightRatingTo}
-							</li>
-						)}
-						{vinInfo.EngineNumberOfCylinders && (
-							<li>
-								<strong>Количество цилиндров:</strong>{' '}
-								{vinInfo.EngineNumberOfCylinders}
-							</li>
-						)}
-						{vinInfo.DisplacementCC && (
-							<li>
-								<strong>Объем двигателя (CC):</strong> {vinInfo.DisplacementCC}
-							</li>
-						)}
-						{vinInfo.DisplacementL && (
-							<li>
-								<strong>Объем двигателя (L):</strong> {vinInfo.DisplacementL}
-							</li>
-						)}
-						{vinInfo.FuelTypePrimary && (
-							<li>
-								<strong>Тип топлива:</strong> {vinInfo.FuelTypePrimary}
-							</li>
-						)}
-						{vinInfo.TransmissionStyle && (
-							<li>
-								<strong>Тип трансмиссии:</strong> {vinInfo.TransmissionStyle}
-							</li>
-						)}
-						{vinInfo.TransmissionSpeeds && (
-							<li>
-								<strong>Количество передач:</strong>{' '}
-								{vinInfo.TransmissionSpeeds}
-							</li>
-						)}
-						{vinInfo.ValveTrainDesign && (
-							<li>
-								<strong>Дизайн клапанного механизма:</strong>{' '}
-								{vinInfo.ValveTrainDesign}
-							</li>
-						)}
-						{vinInfo.EngineConfiguration && (
-							<li>
-								<strong>Конфигурация двигателя:</strong>{' '}
-								{vinInfo.EngineConfiguration}
-							</li>
-						)}
-						{vinInfo.EngineBrakeHPFrom && (
-							<li>
-								<strong>Мощность двигателя (HP):</strong>{' '}
-								{vinInfo.EngineBrakeHPFrom}
-							</li>
-						)}
-						{vinInfo.FrontAirBagLocations && (
-							<li>
-								<strong>Передние подушки безопасности:</strong>{' '}
-								{vinInfo.FrontAirBagLocations}
-							</li>
-						)}
-						{vinInfo.SideAirBagLocations && (
-							<li>
-								<strong>Боковые подушки безопасности:</strong>{' '}
-								{vinInfo.SideAirBagLocations}
-							</li>
-						)}
+						<li>
+							<strong>Год выпуска:</strong> {car.release_year}
+						</li>
+						<li>
+							<strong>Тип двигателя:</strong> {car.engine_type}
+						</li>
+						<li>
+							<strong>Коробка передач:</strong> {car.transmission}
+						</li>
+						<li>
+							<strong>Привод:</strong> {car.drive}
+						</li>
+						<li>
+							<strong>Цвет:</strong> {car.color}
+						</li>
+						<li>
+							<strong>Состояние:</strong> {car.condition}
+						</li>
+						<li>
+							<strong>Владельцы по ПТС:</strong> {car.owners_by_PTS}
+						</li>
+						<li>
+							<strong>VIN:</strong> {car.VIN}
+						</li>
+						<li>
+							<strong>Производитель:</strong> {car.manufacturer}
+						</li>
+						<li>
+							<strong>Тип автомобиля:</strong> {car.car_type}
+						</li>
 					</ul>
 				</div>
-			)}
-			<div className='car-detail__location'>
-				<h3>Расположение</h3>
-				<p>{car.adress}</p>
-			</div>
-			<div className='car-detail__description'>
-				<h3>Описание</h3>
-				<p>{car.description}</p>
-			</div>
-			{isOwner ? (
-				<div>
-					<h3>Это ваше объявление</h3>
-					<div className='car-item__actions'>
-						<Button
-							type='primary'
-							onClick={() => navigate(`/edit-car/${car.id}`)}
-						>
-							Редактировать
-						</Button>
-						<Button onClick={() => handleDelete(car.id)}>Удалить</Button>
-					</div>
-				</div>
-			) : (
-				<>
-					<div
-						className='car-detail__owner'
-						onClick={() => navigate(`/profile/${car.user_id}`)}
-					>
-						<h3>Владелец объявления</h3>
-						<p>
-							<strong>Имя:</strong> {car.user_name} {car.user_surname}
-						</p>
-						<p>
-							<strong>Телефон:</strong> {car.user_phone || 'Не указан'}
-						</p>
-					</div>
-					<div className='car-detail__actions'>
-						<div className='car-detail__favorite' onClick={toggleFavorite}>
-							{isFavorite ? (
-								<HeartFilled style={{ color: 'red' }} />
-							) : (
-								<HeartOutlined />
+				{vinInfo && (
+					<div className='car-detail__vin-info'>
+						<h3>Информация по VIN</h3>
+						<ul>
+							{vinInfo.ErrorText && (
+								<li>
+									<strong>Текст ошибки:</strong> {vinInfo.ErrorText}
+								</li>
 							)}
-						</div>
-						<MessageSender receiverId={car.user_id.toString()} />
+							{vinInfo.VehicleDescriptor && (
+								<li>
+									<strong>Описание транспортного средства:</strong>{' '}
+									{vinInfo.VehicleDescriptor}
+								</li>
+							)}
+							{vinInfo.Trim && (
+								<li>
+									<strong>Комплектация:</strong> {vinInfo.Trim}
+								</li>
+							)}
+							{vinInfo.BodyClass && (
+								<li>
+									<strong>Класс кузова:</strong> {vinInfo.BodyClass}
+								</li>
+							)}
+							{vinInfo.Doors && (
+								<li>
+									<strong>Количество дверей:</strong> {vinInfo.Doors}
+								</li>
+							)}
+							{vinInfo.GrossVehicleWeightRatingFrom && (
+								<li>
+									<strong>Рейтинг полной массы (начало):</strong>{' '}
+									{vinInfo.GrossVehicleWeightRatingFrom}
+								</li>
+							)}
+							{vinInfo.GrossVehicleWeightRatingTo && (
+								<li>
+									<strong>Рейтинг полной массы (конец):</strong>{' '}
+									{vinInfo.GrossVehicleWeightRatingTo}
+								</li>
+							)}
+							{vinInfo.EngineNumberOfCylinders && (
+								<li>
+									<strong>Количество цилиндров:</strong>{' '}
+									{vinInfo.EngineNumberOfCylinders}
+								</li>
+							)}
+							{vinInfo.DisplacementCC && (
+								<li>
+									<strong>Объем двигателя (CC):</strong>{' '}
+									{vinInfo.DisplacementCC}
+								</li>
+							)}
+							{vinInfo.DisplacementL && (
+								<li>
+									<strong>Объем двигателя (L):</strong> {vinInfo.DisplacementL}
+								</li>
+							)}
+							{vinInfo.FuelTypePrimary && (
+								<li>
+									<strong>Тип топлива:</strong> {vinInfo.FuelTypePrimary}
+								</li>
+							)}
+							{vinInfo.TransmissionStyle && (
+								<li>
+									<strong>Тип трансмиссии:</strong> {vinInfo.TransmissionStyle}
+								</li>
+							)}
+							{vinInfo.TransmissionSpeeds && (
+								<li>
+									<strong>Количество передач:</strong>{' '}
+									{vinInfo.TransmissionSpeeds}
+								</li>
+							)}
+							{vinInfo.ValveTrainDesign && (
+								<li>
+									<strong>Дизайн клапанного механизма:</strong>{' '}
+									{vinInfo.ValveTrainDesign}
+								</li>
+							)}
+							{vinInfo.EngineConfiguration && (
+								<li>
+									<strong>Конфигурация двигателя:</strong>{' '}
+									{vinInfo.EngineConfiguration}
+								</li>
+							)}
+							{vinInfo.EngineBrakeHPFrom && (
+								<li>
+									<strong>Мощность двигателя (HP):</strong>{' '}
+									{vinInfo.EngineBrakeHPFrom}
+								</li>
+							)}
+							{vinInfo.FrontAirBagLocations && (
+								<li>
+									<strong>Передние подушки безопасности:</strong>{' '}
+									{vinInfo.FrontAirBagLocations}
+								</li>
+							)}
+							{vinInfo.SideAirBagLocations && (
+								<li>
+									<strong>Боковые подушки безопасности:</strong>{' '}
+									{vinInfo.SideAirBagLocations}
+								</li>
+							)}
+						</ul>
 					</div>
-				</>
-			)}
-			<div className='car-detail__ai-chat'>
-				<h3>Чат с ИИ</h3>
-				<AIChat
-					context={`У меня есть сайт и на нем есть пользователи, которые отправляют тебе запросы. Этот пользователь спрашивает о машине ${car.brand} ${car.model} ${car.release_year} года. ОТВЕЧАЙ ЕМУ НА РУССКОМ`}
-				/>
+				)}
+				<div className='car-detail__location'>
+					<h3>Расположение</h3>
+					<p>{car.adress}</p>
+				</div>
+				<div className='car-detail__description'>
+					<h3>Описание</h3>
+					<p>{car.description}</p>
+				</div>
+			</div>
+			<div className='car-detail__right'>
+				{isOwner ? (
+					<div>
+						<h3>Это ваше объявление</h3>
+						<div className='car-item__actions'>
+							<Button
+								type='primary'
+								onClick={() => navigate(`/edit-car/${car.id}`)}
+							>
+								Редактировать
+							</Button>
+							<Button onClick={() => handleDelete(car.id)}>Удалить</Button>
+						</div>
+					</div>
+				) : (
+					<>
+						<div
+							className='car-detail__owner'
+							onClick={() => navigate(`/profile/${car.user_id}`)}
+						>
+							<h3>Владелец объявления</h3>
+							<p>
+								<strong>Имя:</strong> {car.user_name} {car.user_surname}
+							</p>
+							<p>
+								<strong>Телефон:</strong> {car.user_phone || 'Не указан'}
+							</p>
+						</div>
+						<div className='car-detail__actions'>
+							<div className='car-detail__favorite' onClick={toggleFavorite}>
+								{isFavorite ? (
+									<HeartFilled style={{ color: 'red' }} />
+								) : (
+									<HeartOutlined />
+								)}
+							</div>
+							<MessageSender receiverId={car.user_id.toString()} />
+						</div>
+					</>
+				)}
+				<div className='car-detail__ai-chat'>
+					<h3>Чат с ИИ</h3>
+					<AIChat
+						context={`У меня есть сайт и на нем есть пользователи, которые отправляют тебе запросы. Этот пользователь спрашивает о машине ${car.brand} ${car.model} ${car.release_year} года. ОТВЕЧАЙ ЕМУ НА РУССКОМ`}
+					/>
+				</div>
 			</div>
 		</div>
 	)
 }
 
-export default CarDetail
+export default withErrorBoundary(CarDetail)

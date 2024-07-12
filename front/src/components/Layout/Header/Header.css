@@ -17,7 +17,17 @@
 	margin-left: 10px;
 }
 
-.logo {
+.logo a {
 	font-weight: bold;
-	font-size: 1.5rem;
+	font-size: 2rem;
+	color: #1677ff; /* Устанавливаем синий цвет */
+	text-decoration: none; /* Убираем подчеркивание */
+}
+
+.logo a:visited {
+	color: #1677ff; /* Устанавливаем синий цвет для посещенных ссылок */
+}
+
+.logo a:hover {
+	color: #1677ff; /* Устанавливаем синий цвет для ссылок при наведении */
 }

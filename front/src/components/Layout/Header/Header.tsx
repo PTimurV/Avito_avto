@@ -4,28 +4,22 @@ import { Button } from 'antd'
 import Profile from '../../Profile/Profile'
 import { useAppSelector, useAppDispatch } from '../../../hooks'
 import { clearUser, setUser } from '../../../store/userSlice'
-import axios from 'axios'
 import './Header.css'
+import useAxios from '../../../AxiosHook/useAxios'
 
 const Header: React.FC = () => {
 	const user = useAppSelector(state => state.user.user)
 	const dispatch = useAppDispatch()
 	const navigate = useNavigate()
+	const { get, post } = useAxios()
 
 	useEffect(() => {
 		const fetchUser = async () => {
 			const accessToken = localStorage.getItem('accessToken')
 			if (accessToken) {
 				try {
-					const response = await axios.get(
-						'http://localhost:3000/api/auth/me',
-						{
-							headers: {
-								Authorization: `Bearer ${accessToken}`,
-							},
-						}
-					)
-					dispatch(setUser(response.data.user))
+					const data = await get('/auth/me')
+					dispatch(setUser(data.user))
 				} catch (error) {
 					console.error('Ошибка при проверке токена:', error)
 					await handleTokenRefresh()
@@ -35,19 +29,17 @@ const Header: React.FC = () => {
 
 		const handleTokenRefresh = async () => {
 			const refreshToken = localStorage.getItem('refreshToken')
+			console.log('Рефрешь= ', refreshToken)
 			if (refreshToken) {
 				try {
-					const response = await axios.post(
-						'http://localhost:3000/api/auth/refresh-token',
+					const data = await post(
+						'/auth/refresh-token',
 						{},
-						{
-							headers: {
-								Authorization: `Bearer ${refreshToken}`,
-							},
-						}
+						{},
+						true // Используем refreshToken
 					)
-					localStorage.setItem('accessToken', response.data.accessToken)
-					fetchUser() // Повторный вызов для получения данных пользователя
+					localStorage.setItem('accessToken', data.accessToken)
+					await fetchUser() // Повторный вызов для получения данных пользователя
 				} catch (error) {
 					console.error('Ошибка при обновлении токена:', error)
 					handleLogout()
@@ -58,7 +50,7 @@ const Header: React.FC = () => {
 		}
 
 		fetchUser()
-	}, [dispatch, navigate])
+	}, [dispatch])
 
 	const handleLogout = () => {
 		dispatch(clearUser())
@@ -70,7 +62,7 @@ const Header: React.FC = () => {
 	return (
 		<div className='header'>
 			<div className='logo'>
-				<Link to='/'>Мой сайт</Link>
+				<Link to='/'>Авито Авто</Link>
 			</div>
 			<div className='nav-buttons'>
 				{user ? (

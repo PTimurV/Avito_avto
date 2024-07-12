@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import { Form, Input, Button, Select, Upload } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
 import { Car } from '../../types'
 import './EditCar.css'
-
 const { Option } = Select
+import useAxios from '../../AxiosHook/useAxios'
+import withErrorBoundary from '../../components/Hoc/withErrorBoundary'
 
 const EditCar: React.FC = () => {
 	const { id } = useParams<{ id: string }>()
@@ -68,6 +68,7 @@ const EditCar: React.FC = () => {
 		{ id: 1, name: 'Битый' },
 		{ id: 2, name: 'Кроме целых' },
 	]
+	const { get, put } = useAxios()
 
 	useEffect(() => {
 		const fetchCar = async () => {
@@ -77,15 +78,12 @@ const EditCar: React.FC = () => {
 					throw new Error('Нет токена доступа')
 				}
 
-				const response = await axios.get(
-					`http://localhost:3000/api/cars/${id}/edit`,
-					{
-						headers: {
-							Authorization: `Bearer ${accessToken}`,
-						},
-					}
-				)
-				setCar(response.data)
+				const data = await get(`/cars/${id}/edit`, {
+					headers: {
+						Authorization: `Bearer ${accessToken}`,
+					},
+				})
+				setCar(data)
 			} catch (error) {
 				console.error('Ошибка при получении данных автомобиля:', error)
 			}
@@ -101,8 +99,8 @@ const EditCar: React.FC = () => {
 				throw new Error('Нет токена доступа')
 			}
 
-			await axios.put(
-				`http://localhost:3000/api/cars/${id}`,
+			await put(
+				`/cars/${id}`,
 				{
 					...values,
 					car_type_id: values.car_type,
@@ -300,4 +298,4 @@ const EditCar: React.FC = () => {
 	)
 }
 
-export default EditCar
+export default withErrorBoundary(EditCar)

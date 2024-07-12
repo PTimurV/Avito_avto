@@ -3,6 +3,7 @@ import * as authService from '../services/authService'
 import {
 	verifyRefreshToken,
 	generateAccessToken,
+	verifyAccessToken,
 } from '../services/tokenService'
 
 const refreshTokens = new Set<string>()
@@ -10,8 +11,6 @@ const refreshTokens = new Set<string>()
 interface ErrorWithMessage {
 	message: string
 }
-
-import { verifyAccessToken } from '../services/tokenService'
 
 export const me = async (req: Request, res: Response) => {
 	try {
@@ -30,6 +29,7 @@ export const me = async (req: Request, res: Response) => {
 
 		res.json({ user })
 	} catch (error) {
+		console.error('Ошибка при получении данных пользователя:', error)
 		res.status(401).send('Invalid token')
 	}
 }
@@ -51,6 +51,7 @@ export const register = async (req: Request, res: Response) => {
 	} catch (error) {
 		const errorMessage =
 			(error as ErrorWithMessage).message || 'An error occurred'
+		console.error('Ошибка при регистрации:', errorMessage)
 		res.status(400).send(errorMessage)
 	}
 }
@@ -69,6 +70,7 @@ export const login = async (req: Request, res: Response) => {
 	} catch (error) {
 		const errorMessage =
 			(error as ErrorWithMessage).message || 'An error occurred'
+		console.error('Ошибка при входе:', errorMessage)
 		res.status(401).send(errorMessage)
 	}
 }
@@ -82,6 +84,7 @@ export const refreshToken = (req: Request, res: Response) => {
 	const refreshToken = authHeader.split(' ')[1]
 
 	if (!refreshTokens.has(refreshToken)) {
+		console.error('Refresh token is not valid or not found in set')
 		return res.status(403).send('Refresh token is not valid')
 	}
 
@@ -89,7 +92,8 @@ export const refreshToken = (req: Request, res: Response) => {
 		const user = verifyRefreshToken(refreshToken)
 		const accessToken = generateAccessToken({ id: user.id, email: user.email })
 		res.json({ accessToken })
-	} catch {
+	} catch (error) {
+		console.error('Ошибка при проверке refresh token:', error)
 		res.status(403).send('Refresh token is not valid')
 	}
 }

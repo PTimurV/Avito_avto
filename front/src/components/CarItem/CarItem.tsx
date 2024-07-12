@@ -30,39 +30,48 @@ const CarItem: React.FC<CarItemProps> = ({
 		setIsModalVisible(false)
 	}
 
-	const imageSrc =
+	const imageSrcs =
 		car.photos && car.photos.length > 0
-			? car.photos[0]
-			: '/images/placeholder.jpg'
+			? car.photos.slice(0, 3)
+			: ['/images/placeholder.jpg']
 
 	return (
 		<Card className='car-item'>
-			<div className='car-item__image' onClick={onClick}>
-				<img src={imageSrc} alt='Car' />
-			</div>
-			<div className='car-item__details' onClick={onClick}>
-				<h3>{`${car.brand} ${car.model} ${car.release_year}, ${car.mileage} км`}</h3>
-				<p>{car.description}</p>
-				<p>
-					<strong>{car.price} ₽</strong>
-				</p>
-			</div>
-			<div
-				className='car-item__owner'
-				onClick={() => navigate(`/profile/${car.user_id}`)}
-			>
-				<div className='car-item__owner-info'>
-					<p>
-						<strong>
-							{car.user_name} {car.user_surname}
-						</strong>
-					</p>
-					<p>{car.user_phone || 'Не указан'}</p>
+			<div className='car-item__header'>
+				<div className='car-item__images' onClick={onClick}>
+					<img src={imageSrcs[0]} alt='Car' className='car-item__main-image' />
+					<div className='car-item__small-images'>
+						{imageSrcs.slice(1).map((src, index) => (
+							<img key={index} src={src} alt='Car' />
+						))}
+					</div>
 				</div>
-			</div>
-			<div className='car-item__actions'>
-				<Button type='primary'>Показать телефон</Button>
-				<Button onClick={showModal}>Написать</Button>
+				<div className='car-item__details' onClick={onClick}>
+					<h3>{`${car.brand} ${car.model} ${car.release_year}, ${car.mileage} км`}</h3>
+
+					<p className='car-item__price'>
+						<strong>{car.price} ₽</strong>
+					</p>
+					<p>{car.description}</p>
+				</div>
+				<div className='car-item__profile'>
+					<div
+						className='car-item__owner'
+						onClick={() => navigate(`/profile/${car.user_id}`)}
+					>
+						<div className='car-item__owner-info'>
+							<p>
+								<strong>
+									{car.user_name} {car.user_surname}
+								</strong>
+							</p>
+							<p>{car.user_phone || 'Не указан'}</p>
+						</div>
+					</div>
+					<Button type='primary' onClick={showModal}>
+						Написать
+					</Button>
+				</div>
 			</div>
 			<div
 				className='car-item__favorite'
